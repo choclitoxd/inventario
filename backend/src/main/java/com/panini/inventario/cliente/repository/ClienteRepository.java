@@ -11,4 +11,5 @@ import java.util.List;
 public interface ClienteRepository extends JpaRepository<Cliente, Integer> {
     List<Cliente> findByNegocioId(Integer negocioId);
     Optional<Cliente> findByTelefonoAndNegocioId(String telefono, Integer negocioId);
+    long countByNegocioId(Integer negocioId);
 }

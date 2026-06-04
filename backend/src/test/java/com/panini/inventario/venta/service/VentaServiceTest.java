@@ -82,7 +82,7 @@ public class VentaServiceTest {
         when(ventaDetalleRepository.save(any(VentaDetalle.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Act
-        Venta venta = ventaService.registrarVenta(dto);
+        Venta venta = ventaService.registrarVenta(dto, 1);
 
         // Assert Venta y Utilidades
         assertEquals(0, new BigDecimal("250000").compareTo(venta.getTotalVenta()));

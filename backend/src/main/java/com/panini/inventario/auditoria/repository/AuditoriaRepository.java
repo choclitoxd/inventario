@@ -7,4 +7,5 @@ import java.util.List;
 public interface AuditoriaRepository extends JpaRepository<Auditoria, Integer> {
     List<Auditoria> findAllByOrderByFechaDesc();
     List<Auditoria> findByNegocioIdOrderByFechaDesc(Integer negocioId);
+    long countByUsuario(String usuario);
 }

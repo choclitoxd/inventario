@@ -5,6 +5,9 @@ import com.panini.inventario.stock.model.Inventario;
 import com.panini.inventario.stock.model.RegistroCajaAbierta;
 import com.panini.inventario.stock.repository.InventarioRepository;
 import com.panini.inventario.stock.repository.RegistroCajaAbiertaRepository;
+import com.panini.inventario.auditoria.service.AuditoriaService;
+import com.panini.inventario.lote.model.LoteInversionista;
+import com.panini.inventario.negocio.model.Negocio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +30,9 @@ public class InventarioServiceTest {
     @Mock
     private RegistroCajaAbiertaRepository registroCajaAbiertaRepository;
 
+    @Mock
+    private AuditoriaService auditoriaService;
+
     @InjectMocks
     private InventarioService inventarioService;
 
@@ -34,17 +41,33 @@ public class InventarioServiceTest {
 
     @BeforeEach
     void setUp() {
-        Producto prodLaminas = Producto.builder().tipo(Producto.Tipo.LAMINAS).build();
+        Negocio negocio = Negocio.builder().id(1).build();
+        LoteInversionista lote = LoteInversionista.builder()
+                .nombreLote("Lote Test")
+                .negocio(negocio)
+                .build();
+
+        Producto prodLaminas = Producto.builder()
+                .nombre("Laminas Qatar")
+                .tipo(Producto.Tipo.LAMINAS)
+                .build();
+
         inventarioLaminas = Inventario.builder()
                 .producto(prodLaminas)
+                .loteInversionista(lote)
                 .cantActualPacas(2)
                 .cantActualCajas(5)
                 .cantActualUnidades(10)
                 .build();
 
-        Producto prodAlbumes = Producto.builder().tipo(Producto.Tipo.ALBUM).build();
+        Producto prodAlbumes = Producto.builder()
+                .nombre("Album Qatar")
+                .tipo(Producto.Tipo.ALBUM)
+                .build();
+
         inventarioAlbumes = Inventario.builder()
                 .producto(prodAlbumes)
+                .loteInversionista(lote)
                 .cantActualPacas(2)
                 .cantActualUnidades(5)
                 .build();
@@ -52,14 +75,16 @@ public class InventarioServiceTest {
 
     @Test
     void abrirCaja_DebeRestarCajaYSumarSobres() {
-        when(inventarioRepository.findById(1)).thenReturn(Optional.of(inventarioLaminas));
+        when(inventarioRepository.findByProductoIdAndLoteInversionistaNegocioId(1, 1))
+                .thenReturn(List.of(inventarioLaminas));
 
-        inventarioService.abrirCaja(1);
+        inventarioService.abrirCaja(1, 1, "testuser");
 
         assertEquals(4, inventarioLaminas.getCantActualCajas());
         assertEquals(114, inventarioLaminas.getCantActualUnidades()); // 10 + 104 sobres
         verify(inventarioRepository).save(inventarioLaminas);
         verify(registroCajaAbiertaRepository).save(any(RegistroCajaAbierta.class));
+        verify(auditoriaService).registrarAccion(eq("testuser"), eq("CONVERSIÓN_STOCK"), anyString(), eq(1));
     }
 
     @Test
@@ -87,9 +112,10 @@ public class InventarioServiceTest {
     @Test
     void abrirCaja_SinStock_DebeLanzarExcepcion() {
         inventarioLaminas.setCantActualCajas(0);
-        when(inventarioRepository.findById(1)).thenReturn(Optional.of(inventarioLaminas));
+        when(inventarioRepository.findByProductoIdAndLoteInversionistaNegocioId(1, 1))
+                .thenReturn(List.of(inventarioLaminas));
 
-        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> inventarioService.abrirCaja(1));
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> inventarioService.abrirCaja(1, 1, "testuser"));
         assertTrue(ex.getMessage().contains("No hay suficientes cajas"));
     }
 }

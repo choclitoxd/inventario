@@ -35,7 +35,7 @@ public class GastoHormigaServiceTest {
                 "Almuerzo", new BigDecimal("15000"), GastoHormiga.CategoriaGasto.ALIMENTACION, null
         );
 
-        GastoHormiga gasto = gastoHormigaService.registrarGasto(dto);
+        GastoHormiga gasto = gastoHormigaService.registrarGasto(dto, 1);
 
         assertEquals("Almuerzo", gasto.getDescripcion());
         assertEquals(new BigDecimal("15000"), gasto.getMonto());

@@ -32,10 +32,10 @@ public class InventarioController {
     @PostMapping("/{id}/abrir-caja")
     public ResponseEntity<Inventario> abrirCaja(
             @PathVariable Integer id,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId,
             @RequestHeader(value = "X-User-Username", required = false) String username) {
         try {
-            Inventario inventario = inventarioService.abrirCaja(id);
-            auditoriaService.registrarAccion(username, "ABRIR_CAJA", "Se abrió 1 caja de: " + inventario.getProducto().getNombre() + " (+104 sobres, lote: " + inventario.getLoteInversionista().getNombreLote() + ")", inventario.getLoteInversionista().getNegocio().getId());
+            Inventario inventario = inventarioService.abrirCaja(id, negocioId, username);
             return ResponseEntity.ok(inventario);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(null);

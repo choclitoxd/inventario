@@ -19,6 +19,9 @@ public class Negocio {
     @Column(nullable = false, length = 150)
     private String nombre;
 
+    @Column(name = "duenos", length = 255)
+    private String duenos;
+
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
 

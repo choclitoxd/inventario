@@ -10,4 +10,5 @@ public interface LoteInversionistaRepository extends JpaRepository<LoteInversion
     List<LoteInversionista> findByNegocioId(Integer negocioId);
     List<LoteInversionista> findByFinanciadorAndNegocioId(LoteInversionista.Financiador financiador, Integer negocioId);
     List<LoteInversionista> findByFinanciadorAndEstadoAndNegocioId(LoteInversionista.Financiador financiador, LoteInversionista.Estado estado, Integer negocioId);
+    long countByNegocioId(Integer negocioId);
 }

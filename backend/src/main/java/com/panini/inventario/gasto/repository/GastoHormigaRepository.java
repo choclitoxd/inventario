@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface GastoHormigaRepository extends JpaRepository<GastoHormiga, Integer> {
     List<GastoHormiga> findByNegocioId(Integer negocioId);
+    long countByNegocioId(Integer negocioId);
 }

@@ -47,8 +47,12 @@ export const api = {
   login: (username, password) => request('/api/usuarios/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   listarNegocios: () => request('/api/negocios'),
   crearNegocio: (negocio) => request('/api/negocios', { method: 'POST', body: JSON.stringify(negocio) }),
+  actualizarNegocio: (id, negocio) => request(`/api/negocios/${id}`, { method: 'PUT', body: JSON.stringify(negocio) }),
+  eliminarNegocio: (id) => request(`/api/negocios/${id}`, { method: 'DELETE' }),
   listarUsuarios: () => request('/api/usuarios'),
   crearUsuario: (usuario) => request('/api/usuarios', { method: 'POST', body: JSON.stringify(usuario) }),
+  actualizarUsuario: (id, usuario) => request(`/api/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(usuario) }),
+  eliminarUsuario: (id) => request(`/api/usuarios/${id}`, { method: 'DELETE' }),
   listarAuditoria: () => request('/api/auditoria'),
 
   // Consola de base de datos avanzada

@@ -51,7 +51,7 @@ public class LoteServiceTest {
             new BigDecimal("200000"), BigDecimal.ZERO, BigDecimal.ZERO
         );
 
-        Inventario inventarioGuardado = loteService.registrarEntradaLote(dto);
+        Inventario inventarioGuardado = loteService.registrarEntradaLote(dto, 1);
 
         assertNotNull(inventarioGuardado);
         assertEquals(5, inventarioGuardado.getCantActualPacas());

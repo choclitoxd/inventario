@@ -156,7 +156,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
   const navItems = getNavItems();
 
   return (
-    <div className="min-h-screen bg-carbon-950 flex flex-col md:flex-row text-zinc-100 font-body">
+    <div className="h-screen w-screen overflow-hidden bg-carbon-950 flex flex-col md:flex-row text-zinc-100 font-body">
       
       {/* Desktop Sidebar (visible en md y superior) */}
       <aside className="hidden md:flex flex-col w-64 bg-carbon-900 border-r border-carbon-800 p-6 flex-shrink-0">

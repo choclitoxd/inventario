@@ -4,6 +4,7 @@ import com.panini.inventario.usuario.model.Usuario;
 import com.panini.inventario.usuario.model.dto.LoginRequest;
 import com.panini.inventario.usuario.model.dto.LoginResponse;
 import com.panini.inventario.usuario.repository.UsuarioRepository;
+import com.panini.inventario.auditoria.repository.AuditoriaRepository;
 import com.panini.inventario.auditoria.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioRepository usuarioRepository;
+    private final AuditoriaRepository auditoriaRepository;
     private final AuditoriaService auditoriaService;
 
     @PostMapping("/login")
@@ -57,4 +59,49 @@ public class UsuarioController {
         auditoriaService.registrarAccion(username, "CREAR_USUARIO", "Se creó el usuario: " + saved.getUsername() + " (Rol: " + saved.getRol() + ")", null);
         return ResponseEntity.ok(saved);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarUsuario(
+            @PathVariable Integer id,
+            @RequestBody Usuario usuarioDetalles,
+            @RequestHeader(value = "X-User-Username", required = false) String sessionUsername) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        usuario.setNombre(usuarioDetalles.getNombre());
+        usuario.setRol(usuarioDetalles.getRol());
+
+        if (usuarioDetalles.getPassword() != null && !usuarioDetalles.getPassword().isBlank()) {
+            usuario.setPassword(usuarioDetalles.getPassword());
+        }
+
+        Usuario updated = usuarioRepository.save(usuario);
+        auditoriaService.registrarAccion(sessionUsername, "ACTUALIZAR_USUARIO", 
+                "Se actualizó el usuario: " + updated.getUsername() + " (Rol: " + updated.getRol() + ")", null);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarUsuario(
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-User-Username", required = false) String sessionUsername) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        if (usuario.getUsername().equals(sessionUsername)) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("No puedes auto-eliminar tu propia cuenta de usuario activa."));
+        }
+
+        long auditCount = auditoriaRepository.countByUsuario(usuario.getUsername());
+        if (auditCount > 0) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("No se puede eliminar el usuario porque tiene registros de actividad en la bitácora de auditoría."));
+        }
+
+        usuarioRepository.delete(usuario);
+        auditoriaService.registrarAccion(sessionUsername, "ELIMINAR_USUARIO", 
+                "Se eliminó el usuario: " + usuario.getUsername(), null);
+        return ResponseEntity.noContent().build();
+    }
+
+    public record ErrorResponse(String message) {}
 }
