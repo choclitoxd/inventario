@@ -21,9 +21,9 @@ import {
 
 // Import views
 import DashboardPage from './pages/DashboardPage';
-import InventarioView from './views/InventarioView';
-import VentaCheckoutView from './views/VentaCheckoutView';
-import LotesDeudasView from './views/LotesDeudasView';
+import InventarioPage from './pages/InventarioPage';
+import VentaCheckoutPage from './pages/VentaCheckoutPage';
+import LotesDeudasPage from './pages/LotesDeudasPage';
 import GastosPage from './pages/GastosPage';
 import LoginPage from './pages/LoginPage';
 import NegocioSelectPage from './pages/NegocioSelectPage';
@@ -474,13 +474,13 @@ function AppRoutes() {
             }
           >
             <Route path="/admin/dashboard" element={<DashboardPage />} />
-            <Route path="/admin/lotes-deudas" element={<LotesDeudasView />} />
+            <Route path="/admin/lotes-deudas" element={<LotesDeudasPage />} />
             <Route path="/admin/gastos" element={<GastosPage />} />
           </Route>
 
           {/* Vistas accesibles por todos (ADMIN, JEFE, VENDEDOR) */}
-          <Route path="/admin/inventario" element={<InventarioView />} />
-          <Route path="/admin/nueva-venta" element={<VentaCheckoutView />} />
+          <Route path="/admin/inventario" element={<InventarioPage />} />
+          <Route path="/admin/nueva-venta" element={<VentaCheckoutPage />} />
         </Route>
       </Route>
 

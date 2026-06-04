@@ -150,7 +150,7 @@ function useAdminDB() {
       const a = document.createElement('a');
       a.href = url;
       
-      const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').substring(0, 14);
+      const timestamp = new Date().toISOString().replace(/\D/g, '').substring(0, 14);
       a.download = `backup_panini_${timestamp}.sql`;
       document.body.appendChild(a);
       a.click();
