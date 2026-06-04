@@ -5,6 +5,7 @@ import com.panini.inventario.venta.model.dto.VentaDTO;
 import com.panini.inventario.venta.repository.VentaDetalleRepository;
 import com.panini.inventario.venta.repository.VentaRepository;
 import com.panini.inventario.venta.service.VentaService;
+import com.panini.inventario.auditoria.service.AuditoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class VentaController {
     private final VentaRepository ventaRepository;
     private final VentaDetalleRepository ventaDetalleRepository;
     private final VentaService ventaService;
+    private final AuditoriaService auditoriaService;
 
     @GetMapping
     public List<Venta> listarVentas(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
@@ -36,12 +38,14 @@ public class VentaController {
     @PostMapping
     public ResponseEntity<Venta> registrarVenta(
             @RequestBody VentaDTO dto,
-            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId,
+            @RequestHeader(value = "X-User-Username", required = false) String username) {
         if (negocioId == null) {
             return ResponseEntity.badRequest().body(null);
         }
         try {
             Venta venta = ventaService.registrarVenta(dto, negocioId);
+            auditoriaService.registrarAccion(username, "REGISTRAR_VENTA", "Se registró la venta #" + venta.getId() + " por un total de $" + venta.getTotalVenta() + " (Cliente: " + venta.getCliente().getNombre() + ", Pago: " + venta.getMetodoPago() + ")", negocioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(venta);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(null);

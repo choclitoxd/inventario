@@ -3,13 +3,26 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const activeNegocioId = localStorage.getItem('active_negocio_id');
   if (activeNegocioId) {
     headers['X-Negocio-Id'] = activeNegocioId;
+  }
+
+  const sessionStr = localStorage.getItem('panini_session');
+  if (sessionStr) {
+    try {
+      const session = JSON.parse(sessionStr);
+      if (session && session.username) {
+        headers['X-User-Username'] = session.username;
+      }
+    } catch (_) {}
   }
 
   const response = await fetch(url, { ...options, headers });
@@ -33,6 +46,15 @@ export const api = {
   // Autenticación
   login: (username, password) => request('/api/usuarios/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   listarNegocios: () => request('/api/negocios'),
+  crearNegocio: (negocio) => request('/api/negocios', { method: 'POST', body: JSON.stringify(negocio) }),
+  listarUsuarios: () => request('/api/usuarios'),
+  crearUsuario: (usuario) => request('/api/usuarios', { method: 'POST', body: JSON.stringify(usuario) }),
+  listarAuditoria: () => request('/api/auditoria'),
+
+  // Consola de base de datos avanzada
+  obtenerDbSalud: () => request('/api/admin/db/health'),
+  ejecutarSql: (query) => request('/api/admin/db/query', { method: 'POST', body: JSON.stringify({ query }) }),
+  restaurarBackup: (formData) => request('/api/admin/db/restore', { method: 'POST', body: formData }),
 
   // Clientes
   listarClientes: () => request('/api/clientes'),

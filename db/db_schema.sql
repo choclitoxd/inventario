@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS registro_cajas_abiertas (
 
 -- -----------------------------------------------------------------------------
 -- 11. TABLA: usuarios
--- Registro de usuarios de acceso al sistema con roles (ADMIN, VENDEDOR).
+-- Registro de usuarios de acceso al sistema con roles (ADMIN, JEFE, VENDEDOR).
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -228,12 +228,27 @@ CREATE TABLE IF NOT EXISTS usuarios (
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
+-- 12. TABLA: auditoria
+-- Registro de acciones y auditoria general del sistema.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS auditoria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(100) NOT NULL,
+    accion VARCHAR(255) NOT NULL,
+    detalle TEXT,
+    negocio_id INT DEFAULT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE SET NULL,
+    INDEX idx_auditoria_fecha (fecha),
+    INDEX idx_auditoria_negocio (negocio_id)
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------------------------------
 -- INSERT DE USUARIOS DE PRUEBA
 -- -----------------------------------------------------------------------------
 INSERT INTO usuarios (username, password, nombre, rol) VALUES
 ('donato', '123456', 'Donato', 'ADMIN'),
-('giank', '123456', 'Giank', 'VENDEDOR'),
+('giank', '123456', 'Giank', 'JEFE'),
 ('vector', '123456', 'Vector', 'VENDEDOR'),
 ('chefcito', '123456', 'Chefcito', 'VENDEDOR')
-ON DUPLICATE KEY UPDATE username=username;
-
+ON DUPLICATE KEY UPDATE rol=VALUES(rol);
