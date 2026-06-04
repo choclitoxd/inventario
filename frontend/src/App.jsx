@@ -16,7 +16,10 @@ import {
   TrendingDown, 
   Layers,
   LogOut,
-  Database
+  Database,
+  Building2,
+  Users,
+  Activity
 } from 'lucide-react';
 
 // Import views
@@ -27,14 +30,19 @@ import LotesDeudasPage from './pages/LotesDeudasPage';
 import GastosPage from './pages/GastosPage';
 import LoginPage from './pages/LoginPage';
 import NegocioSelectPage from './pages/NegocioSelectPage';
-import AdminDBPage from './pages/AdminDBPage';
 import ProtectedRoute from './components/ProtectedRoute';
+
+// Import Global Admin Pages
+import DbConsolePage from './pages/global/DbConsolePage';
+import SedesPage from './pages/global/SedesPage';
+import UsuariosPage from './pages/global/UsuariosPage';
+import AuditoriaPage from './pages/global/AuditoriaPage';
 
 // 1. Wrapper para redirigir desde Login si ya está autenticado
 function LoginRouteWrapper({ currentUser, currentNegocio, onLoginSuccess }) {
   if (currentUser) {
-    if (currentUser.rol === 'ADMIN' && !currentNegocio) {
-      return <Navigate to="/admin/admin-db" replace />;
+    if (currentUser.rol === 'ADMIN') {
+      return <Navigate to="/admin/global/database" replace />;
     }
     if (!currentNegocio) {
       return <Navigate to="/admin/seleccion-negocio" replace />;
@@ -58,68 +66,88 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
   const getNavItems = () => {
     const items = [];
     
-    // Dashboard solo para JEFE/ADMIN y si hay negocio seleccionado
-    if (currentNegocio && (currentUser.rol === 'JEFE' || currentUser.rol === 'ADMIN')) {
-      items.push({ 
-        id: 'dashboard', 
-        label: 'Dashboard', 
-        path: '/admin/dashboard', 
-        icon: TrendingUp, 
-        activeColor: 'text-neonGreen', 
-        borderSideColor: 'border-neonGreen' 
-      });
-    }
-    
-    // Inventario y Nueva Venta para todos con negocio seleccionado
-    if (currentNegocio) {
-      items.push({ 
-        id: 'inventario', 
-        label: 'Inventario', 
-        path: '/admin/inventario', 
-        icon: Package, 
-        activeColor: 'text-neonGreen', 
-        borderSideColor: 'border-neonGreen' 
-      });
-      items.push({ 
-        id: 'ventas', 
-        label: 'Nueva Venta', 
-        path: '/admin/nueva-venta', 
-        icon: ShoppingCart, 
-        activeColor: 'text-neonGreen', 
-        borderSideColor: 'border-neonGreen' 
-      });
-    }
-    
-    // Lotes y Gastos solo para JEFE/ADMIN y con negocio seleccionado
-    if (currentNegocio && (currentUser.rol === 'JEFE' || currentUser.rol === 'ADMIN')) {
-      items.push({ 
-        id: 'lotes', 
-        label: 'Lotes/Deudas', 
-        path: '/admin/lotes-deudas', 
-        icon: Coins, 
-        activeColor: 'text-neonCyan', 
-        borderSideColor: 'border-neonCyan' 
-      });
-      items.push({ 
-        id: 'gastos', 
-        label: 'Gastos', 
-        path: '/admin/gastos', 
-        icon: TrendingDown, 
-        activeColor: 'text-red-500', 
-        borderSideColor: 'border-red-500' 
-      });
-    }
-    
-    // Base de Datos solo para ADMIN
     if (currentUser.rol === 'ADMIN') {
       items.push({ 
-        id: 'admin-db', 
-        label: 'Base de Datos', 
-        path: '/admin/admin-db', 
+        id: 'global-db', 
+        label: 'Consola DB', 
+        path: '/admin/global/database', 
         icon: Database, 
         activeColor: 'text-neonCyan', 
         borderSideColor: 'border-neonCyan' 
       });
+      items.push({ 
+        id: 'global-sedes', 
+        label: 'Gestión de Sedes', 
+        path: '/admin/global/sedes', 
+        icon: Building2, 
+        activeColor: 'text-neonCyan', 
+        borderSideColor: 'border-neonCyan' 
+      });
+      items.push({ 
+        id: 'global-usuarios', 
+        label: 'Control de Usuarios', 
+        path: '/admin/global/usuarios', 
+        icon: Users, 
+        activeColor: 'text-neonCyan', 
+        borderSideColor: 'border-neonCyan' 
+      });
+      items.push({ 
+        id: 'global-auditoria', 
+        label: 'Bitácora de Auditoría', 
+        path: '/admin/global/auditoria', 
+        icon: Activity, 
+        activeColor: 'text-neonCyan', 
+        borderSideColor: 'border-neonCyan' 
+      });
+    } else {
+      if (currentNegocio && currentUser.rol === 'JEFE') {
+        items.push({ 
+          id: 'dashboard', 
+          label: 'Dashboard', 
+          path: '/admin/dashboard', 
+          icon: TrendingUp, 
+          activeColor: 'text-neonGreen', 
+          borderSideColor: 'border-neonGreen' 
+        });
+      }
+      
+      if (currentNegocio) {
+        items.push({ 
+          id: 'inventario', 
+          label: 'Inventario', 
+          path: '/admin/inventario', 
+          icon: Package, 
+          activeColor: 'text-neonGreen', 
+          borderSideColor: 'border-neonGreen' 
+        });
+        items.push({ 
+          id: 'ventas', 
+          label: 'Nueva Venta', 
+          path: '/admin/nueva-venta', 
+          icon: ShoppingCart, 
+          activeColor: 'text-neonGreen', 
+          borderSideColor: 'border-neonGreen' 
+        });
+      }
+      
+      if (currentNegocio && currentUser.rol === 'JEFE') {
+        items.push({ 
+          id: 'lotes', 
+          label: 'Lotes/Deudas', 
+          path: '/admin/lotes-deudas', 
+          icon: Coins, 
+          activeColor: 'text-neonCyan', 
+          borderSideColor: 'border-neonCyan' 
+        });
+        items.push({ 
+          id: 'gastos', 
+          label: 'Gastos', 
+          path: '/admin/gastos', 
+          icon: TrendingDown, 
+          activeColor: 'text-red-500', 
+          borderSideColor: 'border-red-500' 
+        });
+      }
     }
     
     return items;
@@ -144,39 +172,41 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
           </div>
         </div>
 
-        {/* Info de Negocio Seleccionado */}
-        {currentNegocio ? (
-          <div className="bg-carbon-950/60 border border-carbon-800 p-3 rounded-xl mb-4 flex flex-col gap-1 animate-fadeIn">
-            <span className="text-[9px] font-bold text-carbon-500 tracking-wider">NEGOCIO ACTIVO</span>
-            <div className="flex items-center justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-sports font-bold text-neonCyan truncate">{currentNegocio.nombre}</p>
-                <span className="text-[8px] text-carbon-500 font-semibold tracking-wider">ID: {currentNegocio.id}</span>
+        {/* Info de Negocio Seleccionado (solo para roles operativos) */}
+        {currentUser.rol !== 'ADMIN' && (
+          currentNegocio ? (
+            <div className="bg-carbon-950/60 border border-carbon-800 p-3 rounded-xl mb-4 flex flex-col gap-1 animate-fadeIn">
+              <span className="text-[9px] font-bold text-carbon-500 tracking-wider">NEGOCIO ACTIVO</span>
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-sports font-bold text-neonCyan truncate">{currentNegocio.nombre}</p>
+                  <span className="text-[8px] text-carbon-500 font-semibold tracking-wider">ID: {currentNegocio.id}</span>
+                </div>
+                <button 
+                  onClick={() => {
+                    onBypassAdminDB();
+                    navigate('/admin/seleccion-negocio');
+                  }}
+                  className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
+                >
+                  Cambiar
+                </button>
               </div>
-              <button 
-                onClick={() => {
-                  onBypassAdminDB();
-                  navigate('/admin/seleccion-negocio');
-                }}
-                className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
-              >
-                Cambiar
-              </button>
             </div>
-          </div>
-        ) : (
-          <div className="bg-carbon-950/60 border border-carbon-800 p-3 rounded-xl mb-4 flex flex-col gap-1 animate-fadeIn">
-            <span className="text-[9px] font-bold text-carbon-500 tracking-wider">NEGOCIO ACTIVO</span>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-500">Sin seleccionar</span>
-              <button 
-                onClick={() => navigate('/admin/seleccion-negocio')}
-                className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
-              >
-                Elegir
-              </button>
+          ) : (
+            <div className="bg-carbon-950/60 border border-carbon-800 p-3 rounded-xl mb-4 flex flex-col gap-1 animate-fadeIn">
+              <span className="text-[9px] font-bold text-carbon-500 tracking-wider">NEGOCIO ACTIVO</span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-500">Sin seleccionar</span>
+                <button 
+                  onClick={() => navigate('/admin/seleccion-negocio')}
+                  className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
+                >
+                  Elegir
+                </button>
+              </div>
             </div>
-          </div>
+          )
         )}
  
         {/* Info de Usuario Activo en Sidebar */}
@@ -252,34 +282,36 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
             </div>
           </div>
 
-          {/* Sede selection on mobile header */}
-          <div className="flex items-center justify-between text-xs border-t border-carbon-800/60 pt-2">
-            <span className="text-[10px] text-carbon-500 font-bold uppercase tracking-wider">Sede:</span>
-            {currentNegocio ? (
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-neonCyan">{currentNegocio.nombre}</span>
-                <button 
-                  onClick={() => {
-                    onBypassAdminDB();
-                    navigate('/admin/seleccion-negocio');
-                  }}
-                  className="text-[9px] text-neonCyan underline font-semibold ml-1"
-                >
-                  Cambiar
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-amber-500">Sin Seleccionar</span>
-                <button 
-                  onClick={() => navigate('/admin/seleccion-negocio')}
-                  className="text-[9px] text-neonCyan underline font-semibold ml-1"
-                >
-                  Elegir
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Sede selection on mobile header (solo para roles operativos) */}
+          {currentUser.rol !== 'ADMIN' && (
+            <div className="flex items-center justify-between text-xs border-t border-carbon-800/60 pt-2">
+              <span className="text-[10px] text-carbon-500 font-bold uppercase tracking-wider">Sede:</span>
+              {currentNegocio ? (
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-neonCyan">{currentNegocio.nombre}</span>
+                  <button 
+                    onClick={() => {
+                      onBypassAdminDB();
+                      navigate('/admin/seleccion-negocio');
+                    }}
+                    className="text-[9px] text-neonCyan underline font-semibold ml-1"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-amber-500">Sin Seleccionar</span>
+                  <button 
+                    onClick={() => navigate('/admin/seleccion-negocio')}
+                    className="text-[9px] text-neonCyan underline font-semibold ml-1"
+                  >
+                    Elegir
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </header>
 
         {/* Dynamic View container */}
@@ -307,7 +339,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
                     {item.label}
                   </span>
                   {isActive && (
-                    <span className={`absolute top-0 w-8 h-0.5 rounded-full ${item.id === 'lotes' || item.id === 'admin-db' ? 'bg-neonCyan' : item.id === 'gastos' ? 'bg-red-500' : 'bg-neonGreen'}`} />
+                    <span className={`absolute top-0 w-8 h-0.5 rounded-full ${item.activeColor.includes('neonCyan') ? 'bg-neonCyan' : item.id === 'gastos' ? 'bg-red-500' : 'bg-neonGreen'}`} />
                   )}
                 </>
               )}
@@ -345,12 +377,10 @@ function AppRoutes() {
   const handleLoginSuccess = (user) => {
     setCurrentUser(user);
     localStorage.setItem('panini_session', JSON.stringify(user));
-    if (user.rol === 'ADMIN' && !currentNegocio) {
-      navigate('/admin/admin-db');
-    } else if (user.rol === 'VENDEDOR') {
-      navigate('/admin/inventario');
+    if (user.rol === 'ADMIN') {
+      navigate('/admin/global/database');
     } else {
-      navigate('/admin/dashboard');
+      navigate('/admin/seleccion-negocio');
     }
   };
 
@@ -439,7 +469,10 @@ function AppRoutes() {
             />
           }
         >
-          <Route path="/admin/admin-db" element={<AdminDBPage />} />
+          <Route path="/admin/global/database" element={<DbConsolePage />} />
+          <Route path="/admin/global/sedes" element={<SedesPage />} />
+          <Route path="/admin/global/usuarios" element={<UsuariosPage />} />
+          <Route path="/admin/global/auditoria" element={<AuditoriaPage />} />
         </Route>
       </Route>
 

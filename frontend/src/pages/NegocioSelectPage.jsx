@@ -31,7 +31,7 @@ function NegocioSelectPage({ onSelectNegocio, onLogout, currentUser, onBypassAdm
             SELECCIONAR <span className="text-neonCyan font-extrabold">NEGOCIO</span>
           </h1>
           <p className="text-xs text-carbon-500 font-medium uppercase tracking-widest">
-            Selecciona la sede o negocio a gestionar
+            Selecciona la sede en la que operarás hoy
           </p>
         </div>
 

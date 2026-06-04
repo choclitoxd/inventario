@@ -82,11 +82,11 @@ function AuditLogsTable({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-carbon-800 text-[10px] font-bold text-carbon-500 tracking-wider uppercase font-sports">
-                  <th className="py-3 px-4">Fecha / Hora</th>
+                  <th className="py-3 px-4">Fecha y Hora</th>
                   <th className="py-3 px-4">Usuario</th>
-                  <th className="py-3 px-4">Acción</th>
-                  <th className="py-3 px-4">Detalle</th>
-                  <th className="py-3 px-4">Negocio (ID)</th>
+                  <th className="py-3 px-4">Sede</th>
+                  <th className="py-3 px-4">Acción / Evento</th>
+                  <th className="py-3 px-4">Detalle (Payload JSON o Texto)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-carbon-800/50">
@@ -108,15 +108,15 @@ function AuditLogsTable({
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-white">@{log.usuario}</td>
+                      <td className="py-3 px-4 text-neonCyan font-semibold">
+                        {log.negocio ? log.negocio.nombre : 'GLOBAL'}
+                      </td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${actionTagColor}`}>
                           {log.accion}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-zinc-300 leading-relaxed min-w-[200px]">{log.detalle}</td>
-                      <td className="py-3 px-4 text-neonCyan font-semibold">
-                        {log.negocio ? `${log.negocio.nombre} (${log.negocio.id})` : 'GLOBAL'}
-                      </td>
                     </tr>
                   );
                 })}

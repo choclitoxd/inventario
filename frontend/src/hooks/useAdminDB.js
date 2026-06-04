@@ -110,11 +110,6 @@ function useAdminDB() {
     }
   };
 
-  useEffect(() => {
-    fetchStatsAndLists();
-    fetchDbHealth();
-    fetchAuditLogs();
-  }, []);
 
   const handleExecuteSql = async (queryToExecute) => {
     const query = queryToExecute || sqlQuery;
