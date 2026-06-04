@@ -26,19 +26,30 @@ public class LoteController {
     private final AmortizacionDeudaService amortizacionDeudaService;
 
     @GetMapping
-    public List<LoteInversionista> listarLotes() {
-        return loteInversionistaRepository.findAll();
+    public List<LoteInversionista> listarLotes(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+        return loteInversionistaRepository.findByNegocioId(negocioId);
     }
 
     @GetMapping("/inversionistas/deudas")
-    public List<LoteInversionista> listarDeudasInversionistas() {
-        return loteInversionistaRepository.findByFinanciador(LoteInversionista.Financiador.INVERSIONISTA_EXTERNO);
+    public List<LoteInversionista> listarDeudasInversionistas(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+        return loteInversionistaRepository.findByFinanciadorAndNegocioId(LoteInversionista.Financiador.INVERSIONISTA_EXTERNO, negocioId);
     }
 
     @PostMapping
-    public ResponseEntity<Inventario> registrarEntradaLote(@RequestBody EntradaLoteDTO dto) {
+    public ResponseEntity<Inventario> registrarEntradaLote(
+            @RequestBody EntradaLoteDTO dto,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
-            Inventario inventario = loteService.registrarEntradaLote(dto);
+            Inventario inventario = loteService.registrarEntradaLote(dto, negocioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(inventario);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

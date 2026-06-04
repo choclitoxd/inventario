@@ -26,14 +26,22 @@ public class VentaController {
     private final VentaService ventaService;
 
     @GetMapping
-    public List<Venta> listarVentas() {
-        return ventaRepository.findAll();
+    public List<Venta> listarVentas(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+        return ventaRepository.findByNegocioId(negocioId);
     }
 
     @PostMapping
-    public ResponseEntity<Venta> registrarVenta(@RequestBody VentaDTO dto) {
+    public ResponseEntity<Venta> registrarVenta(
+            @RequestBody VentaDTO dto,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
         try {
-            Venta venta = ventaService.registrarVenta(dto);
+            Venta venta = ventaService.registrarVenta(dto, negocioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(venta);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(null);
@@ -41,11 +49,16 @@ public class VentaController {
     }
 
     @GetMapping("/sugerencia-precios")
-    public ResponseEntity<SugerenciaPreciosDTO> obtenerPreciosSugeridos(@RequestParam Integer productoId) {
+    public ResponseEntity<SugerenciaPreciosDTO> obtenerPreciosSugeridos(
+            @RequestParam Integer productoId,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         PageRequest limit = PageRequest.of(0, 5);
-        List<BigDecimal> pacas = ventaDetalleRepository.findSuggestedPricesPaca(productoId, limit);
-        List<BigDecimal> cajas = ventaDetalleRepository.findSuggestedPricesCaja(productoId, limit);
-        List<BigDecimal> unidades = ventaDetalleRepository.findSuggestedPricesUnidad(productoId, limit);
+        List<BigDecimal> pacas = ventaDetalleRepository.findSuggestedPricesPaca(productoId, negocioId, limit);
+        List<BigDecimal> cajas = ventaDetalleRepository.findSuggestedPricesCaja(productoId, negocioId, limit);
+        List<BigDecimal> unidades = ventaDetalleRepository.findSuggestedPricesUnidad(productoId, negocioId, limit);
 
         return ResponseEntity.ok(new SugerenciaPreciosDTO(pacas, cajas, unidades));
     }

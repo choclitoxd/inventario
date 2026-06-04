@@ -35,33 +35,41 @@ public class VentaService {
     private final InventarioRepository inventarioRepository;
     private final LoteInversionistaRepository loteInversionistaRepository;
     private final AmortizacionDeudaRepository amortizacionDeudaRepository;
+    private final com.panini.inventario.negocio.repository.NegocioRepository negocioRepository;
 
     @Transactional
-    public Venta registrarVenta(VentaDTO dto) {
+    public Venta registrarVenta(VentaDTO dto, Integer negocioId) {
         Cliente cliente;
         if (dto.clienteId() != null) {
             cliente = clienteRepository.findById(dto.clienteId())
                     .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + dto.clienteId()));
         } else if (dto.clienteTelefono() != null) {
-            cliente = clienteRepository.findByTelefono(dto.clienteTelefono())
+            cliente = clienteRepository.findByTelefonoAndNegocioId(dto.clienteTelefono(), negocioId)
                     .orElseGet(() -> {
                         if (dto.clienteNombre() == null || dto.clienteNombre().isBlank()) {
                             throw new IllegalArgumentException("Se requiere el nombre para crear un cliente nuevo");
                         }
+                        com.panini.inventario.negocio.model.Negocio negocio = negocioRepository.findById(negocioId)
+                                .orElseThrow(() -> new IllegalArgumentException("Negocio no encontrado con ID: " + negocioId));
                         return clienteRepository.save(Cliente.builder()
                                 .nombre(dto.clienteNombre())
                                 .telefono(dto.clienteTelefono())
+                                .negocio(negocio)
                                 .build());
                     });
         } else {
             throw new IllegalArgumentException("Debe enviar clienteId o clienteTelefono");
         }
 
+        com.panini.inventario.negocio.model.Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new IllegalArgumentException("Negocio no encontrado con ID: " + negocioId));
+
         Venta venta = Venta.builder()
                 .cliente(cliente)
                 .metodoPago(dto.metodoPago())
                 .totalVenta(BigDecimal.ZERO)
                 .utilidadBrutaTotal(BigDecimal.ZERO)
+                .negocio(negocio)
                 .build();
         
         venta = ventaRepository.save(venta);

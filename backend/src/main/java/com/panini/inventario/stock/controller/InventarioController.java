@@ -20,8 +20,11 @@ public class InventarioController {
     private final InventarioService inventarioService;
 
     @GetMapping
-    public List<Inventario> listarInventario() {
-        return inventarioRepository.findAll();
+    public List<Inventario> listarInventario(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+        return inventarioRepository.findByLoteInversionistaNegocioId(negocioId);
     }
 
     @PostMapping("/{id}/abrir-caja")

@@ -22,14 +22,22 @@ public class GastoHormigaController {
     private final GastoHormigaService gastoHormigaService;
 
     @GetMapping
-    public List<GastoHormiga> listarGastos() {
-        return gastoHormigaRepository.findAll();
+    public List<GastoHormiga> listarGastos(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+        return gastoHormigaRepository.findByNegocioId(negocioId);
     }
 
     @PostMapping
-    public ResponseEntity<GastoHormiga> registrarGasto(@RequestBody GastoHormigaDTO dto) {
+    public ResponseEntity<GastoHormiga> registrarGasto(
+            @RequestBody GastoHormigaDTO dto,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
-            GastoHormiga gasto = gastoHormigaService.registrarGasto(dto);
+            GastoHormiga gasto = gastoHormigaService.registrarGasto(dto, negocioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(gasto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

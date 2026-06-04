@@ -8,6 +8,16 @@ CREATE DATABASE IF NOT EXISTS panini_db CHARACTER SET utf8mb4 COLLATE utf8mb4_un
 USE panini_db;
 
 -- -----------------------------------------------------------------------------
+-- 0. TABLA: negocios
+-- Registro de los diferentes locales o sucursales del negocio.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS negocios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------------------------------
 -- 1. TABLA: clientes
 -- Registra clientes "al vuelo" con Nombre y Teléfono como identificador único.
 -- -----------------------------------------------------------------------------
@@ -15,8 +25,11 @@ CREATE TABLE IF NOT EXISTS clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     telefono VARCHAR(20) NOT NULL UNIQUE,
+    negocio_id INT NOT NULL,
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_clientes_telefono (telefono)
+    FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE CASCADE,
+    INDEX idx_clientes_telefono (telefono),
+    INDEX idx_clientes_negocio (negocio_id)
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
@@ -61,8 +74,11 @@ CREATE TABLE IF NOT EXISTS lotes_inversionistas (
     saldo_pendiente DECIMAL(15, 2) DEFAULT 0.00 COMMENT 'Monto que falta pagar de la deuda',
     porcentaje_ganancia_amortizacion DECIMAL(5, 2) DEFAULT 0.00 COMMENT 'Porcentaje de la ganancia de la venta que va a amortizar (0.00% a 100.00%)',
     estado ENUM('ACTIVO', 'LIQUIDADO') DEFAULT 'ACTIVO',
+    negocio_id INT NOT NULL,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_lotes_financiador (financiador)
+    FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE CASCADE,
+    INDEX idx_lotes_financiador (financiador),
+    INDEX idx_lotes_negocio (negocio_id)
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
@@ -108,8 +124,11 @@ CREATE TABLE IF NOT EXISTS ventas (
     metodo_pago ENUM('EFECTIVO', 'TRANSFERENCIA') NOT NULL,
     total_venta DECIMAL(15, 2) NOT NULL,
     utilidad_bruta_total DECIMAL(15, 2) NOT NULL COMMENT 'Venta total - Costo total de mercancía vendida',
+    negocio_id INT NOT NULL,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE RESTRICT,
-    INDEX idx_ventas_fecha (fecha_venta)
+    FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE CASCADE,
+    INDEX idx_ventas_fecha (fecha_venta),
+    INDEX idx_ventas_negocio (negocio_id)
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
@@ -175,8 +194,11 @@ CREATE TABLE IF NOT EXISTS gastos_hormiga (
     fecha_gasto DATETIME DEFAULT CURRENT_TIMESTAMP,
     categoria ENUM('FLETE', 'TRANSPORTE', 'ALIMENTACION', 'OTRO') NOT NULL,
     lote_inversionista_id INT DEFAULT NULL COMMENT 'Opcional: Si se desea asignar el gasto hormiga a un lote/financiador específico',
+    negocio_id INT NOT NULL,
     FOREIGN KEY (lote_inversionista_id) REFERENCES lotes_inversionistas(id) ON DELETE SET NULL,
-    INDEX idx_gastos_fecha (fecha_gasto)
+    FOREIGN KEY (negocio_id) REFERENCES negocios(id) ON DELETE CASCADE,
+    INDEX idx_gastos_fecha (fecha_gasto),
+    INDEX idx_gastos_negocio (negocio_id)
 ) ENGINE=InnoDB;
 
 -- -----------------------------------------------------------------------------
@@ -192,3 +214,26 @@ CREATE TABLE IF NOT EXISTS registro_cajas_abiertas (
     FOREIGN KEY (inventario_id) REFERENCES inventario(id) ON DELETE RESTRICT,
     INDEX idx_cajas_abiertas_fecha (fecha_apertura)
 ) ENGINE=InnoDB;
+
+-- -----------------------------------------------------------------------------
+-- 11. TABLA: usuarios
+-- Registro de usuarios de acceso al sistema con roles (ADMIN, VENDEDOR).
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    rol VARCHAR(50) DEFAULT 'VENDEDOR'
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------------------------------
+-- INSERT DE USUARIOS DE PRUEBA
+-- -----------------------------------------------------------------------------
+INSERT INTO usuarios (username, password, nombre, rol) VALUES
+('donato', '123456', 'Donato', 'ADMIN'),
+('giank', '123456', 'Giank', 'VENDEDOR'),
+('vector', '123456', 'Vector', 'VENDEDOR'),
+('chefcito', '123456', 'Chefcito', 'VENDEDOR')
+ON DUPLICATE KEY UPDATE username=username;
+

@@ -35,6 +35,10 @@ public class Venta {
     @Column(name = "utilidad_bruta_total", precision = 15, scale = 2, nullable = false)
     private BigDecimal utilidadBrutaTotal;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "negocio_id", nullable = false)
+    private com.panini.inventario.negocio.model.Negocio negocio;
+
     @PrePersist
     protected void onCreate() {
         if (fechaVenta == null) {

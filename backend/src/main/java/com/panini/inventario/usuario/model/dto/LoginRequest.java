@@ -1,0 +1,6 @@
+package com.panini.inventario.usuario.model.dto;
+
+public record LoginRequest(
+    String username,
+    String password
+) {}

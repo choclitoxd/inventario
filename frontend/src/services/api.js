@@ -7,6 +7,11 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
+  const activeNegocioId = localStorage.getItem('active_negocio_id');
+  if (activeNegocioId) {
+    headers['X-Negocio-Id'] = activeNegocioId;
+  }
+
   const response = await fetch(url, { ...options, headers });
   
   if (!response.ok) {
@@ -25,6 +30,10 @@ async function request(endpoint, options = {}) {
 }
 
 export const api = {
+  // Autenticación
+  login: (username, password) => request('/api/usuarios/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  listarNegocios: () => request('/api/negocios'),
+
   // Clientes
   listarClientes: () => request('/api/clientes'),
   buscarClientePorTelefono: (telefono) => request(`/api/clientes/buscar?telefono=${encodeURIComponent(telefono)}`),

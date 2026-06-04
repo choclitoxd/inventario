@@ -25,13 +25,17 @@ public class ReporteService {
     private final GastoHormigaRepository gastoHormigaRepository;
     private final LoteInversionistaRepository loteInversionistaRepository;
 
-    public ResumenFinancieroDTO obtenerResumen(LocalDateTime desde, LocalDateTime hasta) {
-        List<Venta> ventas = ventaRepository.findAll().stream()
+    public ResumenFinancieroDTO obtenerResumen(LocalDateTime desde, LocalDateTime hasta, Integer negocioId) {
+        if (negocioId == null) {
+            return new ResumenFinancieroDTO(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        }
+
+        List<Venta> ventas = ventaRepository.findByNegocioId(negocioId).stream()
                 .filter(v -> (desde == null || !v.getFechaVenta().isBefore(desde)) && 
                              (hasta == null || !v.getFechaVenta().isAfter(hasta)))
                 .collect(Collectors.toList());
 
-        List<GastoHormiga> gastos = gastoHormigaRepository.findAll().stream()
+        List<GastoHormiga> gastos = gastoHormigaRepository.findByNegocioId(negocioId).stream()
                 .filter(g -> (desde == null || !g.getFechaGasto().isBefore(desde)) && 
                              (hasta == null || !g.getFechaGasto().isAfter(hasta)))
                 .collect(Collectors.toList());
@@ -44,6 +48,7 @@ public class ReporteService {
                 .map(Venta::getUtilidadBrutaTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // Let's use the correct getter: getUtilidadBrutaTotal()
         BigDecimal totalGastos = gastos.stream()
                 .map(GastoHormiga::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -53,9 +58,15 @@ public class ReporteService {
         return new ResumenFinancieroDTO(totalVentas, utilidadBruta, totalGastos, utilidadNeta);
     }
 
-    public List<CapitalSegmentadoDTO> obtenerCapitalSegmentado() {
-        List<LoteInversionista> lotes = loteInversionistaRepository.findAll();
-        List<VentaDetalle> detalles = ventaDetalleRepository.findAll();
+    public List<CapitalSegmentadoDTO> obtenerCapitalSegmentado(Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+
+        List<LoteInversionista> lotes = loteInversionistaRepository.findByNegocioId(negocioId);
+        List<VentaDetalle> detalles = ventaDetalleRepository.findAll().stream()
+                .filter(d -> d.getVenta() != null && d.getVenta().getNegocio() != null && d.getVenta().getNegocio().getId().equals(negocioId))
+                .collect(Collectors.toList());
 
         Map<LoteInversionista.Financiador, List<LoteInversionista>> lotesPorFinanciador = lotes.stream()
                 .collect(Collectors.groupingBy(LoteInversionista::getFinanciador));
@@ -103,8 +114,14 @@ public class ReporteService {
         return reporte;
     }
 
-    public List<FluctuacionPrecioDTO> obtenerFluctuacionPrecios() {
-        List<VentaDetalle> detalles = ventaDetalleRepository.findAll();
+    public List<FluctuacionPrecioDTO> obtenerFluctuacionPrecios(Integer negocioId) {
+        if (negocioId == null) {
+            return List.of();
+        }
+
+        List<VentaDetalle> detalles = ventaDetalleRepository.findAll().stream()
+                .filter(d -> d.getVenta() != null && d.getVenta().getNegocio() != null && d.getVenta().getNegocio().getId().equals(negocioId))
+                .collect(Collectors.toList());
         List<FluctuacionPrecioDTO> reporte = new ArrayList<>();
 
         for (VentaDetalle det : detalles) {

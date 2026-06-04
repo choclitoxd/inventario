@@ -21,11 +21,15 @@ public class LoteService {
     private final LoteInversionistaRepository loteInversionistaRepository;
     private final InventarioRepository inventarioRepository;
     private final ProductoRepository productoRepository;
+    private final com.panini.inventario.negocio.repository.NegocioRepository negocioRepository;
 
     @Transactional
-    public Inventario registrarEntradaLote(EntradaLoteDTO dto) {
+    public Inventario registrarEntradaLote(EntradaLoteDTO dto, Integer negocioId) {
         Producto producto = productoRepository.findById(dto.productoId())
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + dto.productoId()));
+
+        com.panini.inventario.negocio.model.Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new IllegalArgumentException("Negocio no encontrado con ID: " + negocioId));
 
         LoteInversionista lote = LoteInversionista.builder()
                 .nombreLote(dto.nombreLote())
@@ -34,6 +38,7 @@ public class LoteService {
                 .montoPrestado(dto.financiador() == LoteInversionista.Financiador.INVERSIONISTA_EXTERNO ? dto.deudaInicial() : BigDecimal.ZERO)
                 .saldoPendiente(dto.financiador() == LoteInversionista.Financiador.INVERSIONISTA_EXTERNO ? dto.deudaInicial() : BigDecimal.ZERO)
                 .estado(LoteInversionista.Estado.ACTIVO)
+                .negocio(negocio)
                 .build();
         
         lote = loteInversionistaRepository.save(lote);

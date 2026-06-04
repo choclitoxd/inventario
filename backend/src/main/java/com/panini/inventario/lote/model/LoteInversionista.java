@@ -42,6 +42,10 @@ public class LoteInversionista {
     @Column(name = "fecha_creacion", updatable = false)
     private LocalDateTime fechaCreacion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "negocio_id", nullable = false)
+    private com.panini.inventario.negocio.model.Negocio negocio;
+
     @PrePersist
     protected void onCreate() {
         if (fechaCreacion == null) {

@@ -9,4 +9,6 @@ import java.util.List;
 public interface InventarioRepository extends JpaRepository<Inventario, Integer> {
     List<Inventario> findByProductoId(Integer productoId);
     List<Inventario> findByLoteInversionistaId(Integer loteInversionistaId);
+    List<Inventario> findByLoteInversionistaNegocioId(Integer negocioId);
+    List<Inventario> findByProductoIdAndLoteInversionistaNegocioId(Integer productoId, Integer negocioId);
 }

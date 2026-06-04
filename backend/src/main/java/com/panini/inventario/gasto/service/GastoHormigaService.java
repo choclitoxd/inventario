@@ -15,13 +15,18 @@ public class GastoHormigaService {
 
     private final GastoHormigaRepository gastoHormigaRepository;
     private final LoteInversionistaRepository loteInversionistaRepository;
+    private final com.panini.inventario.negocio.repository.NegocioRepository negocioRepository;
 
     @Transactional
-    public GastoHormiga registrarGasto(GastoHormigaDTO dto) {
+    public GastoHormiga registrarGasto(GastoHormigaDTO dto, Integer negocioId) {
+        com.panini.inventario.negocio.model.Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new IllegalArgumentException("Negocio no encontrado con ID: " + negocioId));
+
         GastoHormiga gasto = GastoHormiga.builder()
                 .descripcion(dto.descripcion())
                 .monto(dto.monto())
                 .categoria(dto.categoria())
+                .negocio(negocio)
                 .build();
 
         if (dto.loteInversionistaId() != null) {

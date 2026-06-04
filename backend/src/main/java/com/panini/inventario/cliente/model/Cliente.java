@@ -25,6 +25,10 @@ public class Cliente {
     @Column(name = "fecha_registro", updatable = false)
     private LocalDateTime fechaRegistro;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "negocio_id", nullable = false)
+    private com.panini.inventario.negocio.model.Negocio negocio;
+
     @PrePersist
     protected void onCreate() {
         if (fechaRegistro == null) {

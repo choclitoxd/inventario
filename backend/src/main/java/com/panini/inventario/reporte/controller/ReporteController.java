@@ -19,17 +19,20 @@ public class ReporteController {
     @GetMapping("/resumen")
     public ReporteService.ResumenFinancieroDTO obtenerResumen(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta) {
-        return reporteService.obtenerResumen(desde, hasta);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        return reporteService.obtenerResumen(desde, hasta, negocioId);
     }
 
     @GetMapping("/capital-segmentado")
-    public List<ReporteService.CapitalSegmentadoDTO> obtenerCapitalSegmentado() {
-        return reporteService.obtenerCapitalSegmentado();
+    public List<ReporteService.CapitalSegmentadoDTO> obtenerCapitalSegmentado(
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        return reporteService.obtenerCapitalSegmentado(negocioId);
     }
 
     @GetMapping("/fluctuacion-precios")
-    public List<ReporteService.FluctuacionPrecioDTO> obtenerFluctuacionPrecios() {
-        return reporteService.obtenerFluctuacionPrecios();
+    public List<ReporteService.FluctuacionPrecioDTO> obtenerFluctuacionPrecios(
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        return reporteService.obtenerFluctuacionPrecios(negocioId);
     }
 }
