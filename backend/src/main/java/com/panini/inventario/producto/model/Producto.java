@@ -27,6 +27,12 @@ public class Producto {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(name = "edicion_coleccion", length = 150)
+    private String edicionColeccion;
+
+    @Column(name = "codigo_barras", length = 100)
+    private String codigoBarras;
+
     @Column(name = "precio_sugerido_defecto", precision = 15, scale = 2)
     private BigDecimal precioSugeridoDefecto;
 
@@ -41,6 +47,6 @@ public class Producto {
     }
 
     public enum Tipo {
-        LAMINAS, ALBUM, COMBO, OTRO
+        FRACCIONADO_COMPLEJO, UNIDADES_SIMPLES
     }
 }

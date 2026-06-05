@@ -25,7 +25,7 @@ public class ProductoService {
 
         Producto combo = Producto.builder()
                 .nombre(dto.nombreCombo())
-                .tipo(Producto.Tipo.COMBO)
+                .tipo(Producto.Tipo.UNIDADES_SIMPLES)
                 .build();
         
         combo = productoRepository.save(combo);

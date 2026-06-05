@@ -34,8 +34,8 @@ public class InventarioService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No hay suficientes cajas en stock para este producto en la sede."));
 
-        if (inventarioConCaja.getProducto().getTipo() != Producto.Tipo.LAMINAS) {
-            throw new IllegalStateException("Solo se pueden abrir cajas de productos tipo LAMINAS");
+        if (inventarioConCaja.getProducto().getTipo() != Producto.Tipo.FRACCIONADO_COMPLEJO) {
+            throw new IllegalStateException("Solo se pueden abrir cajas de productos tipo FRACCIONADO_COMPLEJO");
         }
 
         // 2. Restar 1 unidad a la columna cant_actual_cajas
@@ -69,8 +69,8 @@ public class InventarioService {
         Inventario inventario = inventarioRepository.findById(inventarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Inventario no encontrado con ID: " + inventarioId));
 
-        if (inventario.getProducto().getTipo() != Producto.Tipo.LAMINAS) {
-            throw new IllegalStateException("Solo se pueden abrir pacas de productos tipo LAMINAS");
+        if (inventario.getProducto().getTipo() != Producto.Tipo.FRACCIONADO_COMPLEJO) {
+            throw new IllegalStateException("Solo se pueden abrir pacas de productos tipo FRACCIONADO_COMPLEJO");
         }
 
         if (inventario.getCantActualPacas() < 1) {
@@ -88,8 +88,8 @@ public class InventarioService {
         Inventario inventario = inventarioRepository.findById(inventarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Inventario no encontrado con ID: " + inventarioId));
 
-        if (inventario.getProducto().getTipo() != Producto.Tipo.ALBUM) {
-            throw new IllegalStateException("Solo se pueden abrir pacas de productos tipo ALBUM");
+        if (inventario.getProducto().getTipo() != Producto.Tipo.UNIDADES_SIMPLES) {
+            throw new IllegalStateException("Solo se pueden abrir pacas de productos tipo UNIDADES_SIMPLES");
         }
 
         if (inventario.getCantActualPacas() < 1) {

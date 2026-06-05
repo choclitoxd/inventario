@@ -30,9 +30,19 @@ public class DataSeeder implements CommandLineRunner {
         private final ProductoRepository productoRepository;
         private final LoteInversionistaRepository loteInversionistaRepository;
         private final InventarioRepository inventarioRepository;
+        private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
         @Override
         public void run(String... args) throws Exception {
+                // Migrar datos antiguos a los nuevos enums de stock dinámico
+                try {
+                        jdbcTemplate.execute("ALTER TABLE productos MODIFY COLUMN tipo VARCHAR(50) NOT NULL");
+                        jdbcTemplate.execute("UPDATE productos SET tipo = 'FRACCIONADO_COMPLEJO' WHERE tipo = 'LAMINAS'");
+                        jdbcTemplate.execute("UPDATE productos SET tipo = 'UNIDADES_SIMPLES' WHERE tipo IN ('ALBUM', 'COMBO', 'OTRO')");
+                        System.out.println(">>> Migración de tipos de producto en base de datos ejecutada con éxito.");
+                } catch (Exception e) {
+                        System.out.println(">>> Advertencia al migrar tipos de producto: " + e.getMessage());
+                }
                 // 1. Seed Users
                 if (usuarioRepository.count() == 0) {
                         Usuario donato = Usuario.builder()
@@ -85,21 +95,21 @@ public class DataSeeder implements CommandLineRunner {
                 if (productoRepository.count() == 0) {
                         album = Producto.builder()
                                         .nombre("Álbum Oficial Qatar 2022")
-                                        .tipo(Tipo.ALBUM)
+                                        .tipo(Tipo.UNIDADES_SIMPLES)
                                         .descripcion("Álbum de pasta blanda oficial de la Copa Mundial Qatar 2022")
                                         .precioSugeridoDefecto(new BigDecimal("10000"))
                                         .build();
 
                         cajaSobres = Producto.builder()
                                         .nombre("Caja de Sobres Qatar 2022")
-                                        .tipo(Tipo.LAMINAS)
+                                        .tipo(Tipo.FRACCIONADO_COMPLEJO)
                                         .descripcion("Caja sellada que contiene 104 sobres de láminas oficiales")
                                         .precioSugeridoDefecto(new BigDecimal("350000"))
                                         .build();
 
                         sobreSuelto = Producto.builder()
                                         .nombre("Sobre de Láminas Qatar 2022")
-                                        .tipo(Tipo.LAMINAS)
+                                        .tipo(Tipo.UNIDADES_SIMPLES)
                                         .descripcion("Sobre individual con 5 láminas oficiales")
                                         .precioSugeridoDefecto(new BigDecimal("3500"))
                                         .build();
@@ -113,14 +123,14 @@ public class DataSeeder implements CommandLineRunner {
                         System.out.println(">>> Catálogo de productos de prueba sembrado");
                 } else {
                         // Load if already exists for inventory seeder
-                        album = productoRepository.findAll().stream().filter(p -> p.getTipo() == Tipo.ALBUM).findFirst()
+                        album = productoRepository.findAll().stream().filter(p -> p.getTipo() == Tipo.UNIDADES_SIMPLES && p.getNombre().contains("Álbum")).findFirst()
                                         .orElse(null);
                         cajaSobres = productoRepository.findAll().stream()
-                                        .filter(p -> p.getTipo() == Tipo.LAMINAS && p.getNombre().contains("Caja"))
+                                        .filter(p -> p.getTipo() == Tipo.FRACCIONADO_COMPLEJO && p.getNombre().contains("Caja"))
                                         .findFirst()
                                         .orElse(null);
                         sobreSuelto = productoRepository.findAll().stream()
-                                        .filter(p -> p.getTipo() == Tipo.LAMINAS && p.getNombre().contains("Sobre"))
+                                        .filter(p -> p.getTipo() == Tipo.UNIDADES_SIMPLES && p.getNombre().contains("Sobre"))
                                         .findFirst()
                                         .orElse(null);
                 }

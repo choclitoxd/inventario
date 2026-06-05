@@ -49,7 +49,7 @@ public class InventarioServiceTest {
 
         Producto prodLaminas = Producto.builder()
                 .nombre("Laminas Qatar")
-                .tipo(Producto.Tipo.LAMINAS)
+                .tipo(Producto.Tipo.FRACCIONADO_COMPLEJO)
                 .build();
 
         inventarioLaminas = Inventario.builder()
@@ -62,7 +62,7 @@ public class InventarioServiceTest {
 
         Producto prodAlbumes = Producto.builder()
                 .nombre("Album Qatar")
-                .tipo(Producto.Tipo.ALBUM)
+                .tipo(Producto.Tipo.UNIDADES_SIMPLES)
                 .build();
 
         inventarioAlbumes = Inventario.builder()

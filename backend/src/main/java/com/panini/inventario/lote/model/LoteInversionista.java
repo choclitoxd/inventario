@@ -2,6 +2,7 @@ package com.panini.inventario.lote.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -44,6 +45,7 @@ public class LoteInversionista {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "negocio_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private com.panini.inventario.negocio.model.Negocio negocio;
 
     @PrePersist

@@ -19,7 +19,8 @@ import {
   Database,
   Building2,
   Users,
-  Activity
+  Activity,
+  Boxes
 } from 'lucide-react';
 
 // Import views
@@ -37,6 +38,7 @@ import DbConsolePage from './pages/global/DbConsolePage';
 import SedesPage from './pages/global/SedesPage';
 import UsuariosPage from './pages/global/UsuariosPage';
 import AuditoriaPage from './pages/global/AuditoriaPage';
+import InventarioGlobalPage from './pages/global/InventarioGlobalPage';
 
 // 1. Wrapper para redirigir desde Login si ya está autenticado
 function LoginRouteWrapper({ currentUser, currentNegocio, onLoginSuccess }) {
@@ -88,6 +90,14 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
         label: 'Control de Usuarios', 
         path: '/admin/global/usuarios', 
         icon: Users, 
+        activeColor: 'text-neonCyan', 
+        borderSideColor: 'border-neonCyan' 
+      });
+      items.push({ 
+        id: 'global-inventario', 
+        label: 'Inventario Global', 
+        path: '/admin/global/inventario', 
+        icon: Boxes, 
         activeColor: 'text-neonCyan', 
         borderSideColor: 'border-neonCyan' 
       });
@@ -472,6 +482,7 @@ function AppRoutes() {
           <Route path="/admin/global/database" element={<DbConsolePage />} />
           <Route path="/admin/global/sedes" element={<SedesPage />} />
           <Route path="/admin/global/usuarios" element={<UsuariosPage />} />
+          <Route path="/admin/global/inventario" element={<InventarioGlobalPage />} />
           <Route path="/admin/global/auditoria" element={<AuditoriaPage />} />
         </Route>
       </Route>

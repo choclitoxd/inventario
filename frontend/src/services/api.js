@@ -68,6 +68,8 @@ export const api = {
   // Productos
   listarProductos: () => request('/api/productos'),
   crearProducto: (producto) => request('/api/productos', { method: 'POST', body: JSON.stringify(producto) }),
+  actualizarProductoAdmin: (id, producto) => request(`/api/admin/productos/${id}`, { method: 'PUT', body: JSON.stringify(producto) }),
+  eliminarProductoAdmin: (id) => request(`/api/admin/productos/${id}`, { method: 'DELETE' }),
   crearCombo: (dto) => request('/api/productos/combos', { method: 'POST', body: JSON.stringify(dto) }),
   obtenerComposicionCombo: (id) => request(`/api/productos/${id}/composicion`),
 
@@ -82,6 +84,7 @@ export const api = {
 
   // Inventario
   listarInventario: () => request('/api/inventario'),
+  obtenerInventarioGlobal: () => request('/api/inventario/global'),
   abrirCaja: (id) => request(`/api/inventario/${id}/abrir-caja`, { method: 'POST' }),
   abrirPacaLaminas: (id) => request(`/api/inventario/${id}/abrir-paca-laminas`, { method: 'POST' }),
   abrirPacaAlbumes: (id) => request(`/api/inventario/${id}/abrir-paca-albumes`, { method: 'POST' }),

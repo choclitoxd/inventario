@@ -38,9 +38,6 @@ public class ProductoController {
         if (producto.getTipo() == null) {
             return ResponseEntity.badRequest().build();
         }
-        if (producto.getTipo() == Producto.Tipo.COMBO) {
-            return ResponseEntity.badRequest().body(null); // Debe crearse a través de /combos
-        }
         Producto guardado = productoRepository.save(producto);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
     }
@@ -58,11 +55,14 @@ public class ProductoController {
     @GetMapping("/{id}/composicion")
     public ResponseEntity<List<ComponenteResponseDTO>> obtenerComposicionCombo(@PathVariable Integer id) {
         Producto combo = productoRepository.findById(id).orElse(null);
-        if (combo == null || combo.getTipo() != Producto.Tipo.COMBO) {
+        if (combo == null) {
             return ResponseEntity.notFound().build();
         }
 
         List<ComboComposicion> composiciones = comboComposicionRepository.findByComboId(id);
+        if (composiciones.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         List<ComponenteResponseDTO> response = composiciones.stream()
                 .map(comp -> new ComponenteResponseDTO(
                         comp.getId(),

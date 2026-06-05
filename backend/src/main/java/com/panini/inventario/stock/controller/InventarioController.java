@@ -29,6 +29,11 @@ public class InventarioController {
         return inventarioRepository.findByLoteInversionistaNegocioId(negocioId);
     }
 
+    @GetMapping("/global")
+    public List<Inventario> obtenerInventarioGlobal() {
+        return inventarioRepository.findAll();
+    }
+
     @PostMapping("/{id}/abrir-caja")
     public ResponseEntity<Inventario> abrirCaja(
             @PathVariable Integer id,

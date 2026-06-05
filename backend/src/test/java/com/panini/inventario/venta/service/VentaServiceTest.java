@@ -6,6 +6,8 @@ import com.panini.inventario.lote.model.AmortizacionDeuda;
 import com.panini.inventario.lote.model.LoteInversionista;
 import com.panini.inventario.lote.repository.AmortizacionDeudaRepository;
 import com.panini.inventario.lote.repository.LoteInversionistaRepository;
+import com.panini.inventario.negocio.model.Negocio;
+import com.panini.inventario.negocio.repository.NegocioRepository;
 import com.panini.inventario.producto.model.Producto;
 import com.panini.inventario.producto.repository.ProductoRepository;
 import com.panini.inventario.stock.model.Inventario;
@@ -39,12 +41,17 @@ public class VentaServiceTest {
     @Mock private InventarioRepository inventarioRepository;
     @Mock private LoteInversionistaRepository loteInversionistaRepository;
     @Mock private AmortizacionDeudaRepository amortizacionDeudaRepository;
+    @Mock private NegocioRepository negocioRepository;
 
     @InjectMocks
     private VentaService ventaService;
 
     @Test
     void registrarVenta_DebeDescontarStock_CalcularUtilidad_YAmortizarAutomaticamente() {
+        // Setup Negocio
+        Negocio negocio = Negocio.builder().id(1).nombre("Sede Test").build();
+        when(negocioRepository.findById(1)).thenReturn(Optional.of(negocio));
+
         // Setup Cliente
         Cliente cliente = Cliente.builder().id(1).nombre("Victor").telefono("123456789").build();
         when(clienteRepository.findById(1)).thenReturn(Optional.of(cliente));
