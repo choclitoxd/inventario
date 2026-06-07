@@ -2,7 +2,7 @@ import React from 'react';
 import ProductoCard from './ProductoCard';
 import { Package } from 'lucide-react';
 
-function InventarioGrid({ productosAgrupados, onAbrirCaja, onSelectProduct, loading }) {
+function InventarioGrid({ productosAgrupados, onSelectProduct, loading }) {
   if (loading) {
     return (
       <div className="p-12 text-center text-carbon-500 font-semibold flex flex-col items-center gap-2">
@@ -27,7 +27,6 @@ function InventarioGrid({ productosAgrupados, onAbrirCaja, onSelectProduct, load
         <ProductoCard
           key={groupedProduct.producto.id}
           groupedProduct={groupedProduct}
-          onAbrirCaja={onAbrirCaja}
           onClickCard={() => onSelectProduct(groupedProduct)}
         />
       ))}

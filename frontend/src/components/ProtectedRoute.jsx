@@ -16,7 +16,7 @@ function ProtectedRoute({
   // 2. Si está autenticado pero su rol no está permitido en esta ruta
   if (allowedRoles && !allowedRoles.includes(currentUser.rol)) {
     // Redirigir según el rol del usuario a su vista por defecto
-    if (currentUser.rol === 'VENDEDOR') {
+    if (currentUser.rol === 'ORGANIZADOR') {
       return <Navigate to="/admin/inventario" replace />;
     }
     return <Navigate to="/admin/dashboard" replace />;
@@ -30,7 +30,7 @@ function ProtectedRoute({
 
   // 4. Si ya tiene negocio seleccionado y trata de ir a la selección de negocio (evitar loops)
   if (currentNegocio && isNegocioSelectionRoute) {
-    if (currentUser.rol === 'VENDEDOR') {
+    if (currentUser.rol === 'ORGANIZADOR') {
       return <Navigate to="/admin/inventario" replace />;
     }
     return <Navigate to="/admin/dashboard" replace />;

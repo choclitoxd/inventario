@@ -1,4 +1,5 @@
 import React from 'react';
+import NumericStepper from '../../common/NumericStepper';
 
 function InversionistaCampos({
   nombreInversionista,
@@ -23,25 +24,19 @@ function InversionistaCampos({
 
       <div className="flex flex-col gap-1">
         <label className="text-[9px] font-bold text-carbon-500">MONTO DEUDA PRESTADA</label>
-        <input
-          type="number"
-          placeholder="COP"
-          value={deudaInicial}
-          onChange={(e) => setDeudaInicial(e.target.value)}
-          className="bg-carbon-800 border border-carbon-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none"
+        <NumericStepper
+          value={parseFloat(deudaInicial) || 0}
+          onChange={(val) => setDeudaInicial(val.toString())}
         />
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="text-[9px] font-bold text-carbon-500">% GANANCIAS PARA AMORTIZACIÓN</label>
-        <input
-          type="number"
-          placeholder="%"
-          min="1"
-          max="100"
-          value={porcentajeAmortizacion}
-          onChange={(e) => setPorcentajeAmortizacion(e.target.value)}
-          className="bg-carbon-800 border border-carbon-700 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none"
+        <NumericStepper
+          value={parseFloat(porcentajeAmortizacion) || 0}
+          onChange={(val) => setPorcentajeAmortizacion(val.toString())}
+          min={1}
+          max={100}
         />
       </div>
     </div>

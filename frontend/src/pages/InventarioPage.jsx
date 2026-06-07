@@ -3,22 +3,32 @@ import useInventario from '../hooks/useInventario';
 import ConversionGuide from '../components/features/inventario/ConversionGuide';
 import InventarioGrid from '../components/features/inventario/InventarioGrid';
 import LotesDesgloseModal from '../components/features/inventario/LotesDesgloseModal';
+import VincularProductoModal from '../components/features/inventario/VincularProductoModal';
+import EditarInventarioModal from '../components/features/inventario/EditarInventarioModal';
 import ErrorMessage from '../components/common/ErrorMessage';
-import { Package, Sparkles } from 'lucide-react';
+import KpiCard from '../components/common/KpiCard';
+import { Package, Sparkles, Plus } from 'lucide-react';
 
-function InventarioPage() {
+function InventarioPage({ currentUser }) {
   const {
     productosAgrupados,
+    productos,
+    lotes,
     loading,
     error,
     successMsg,
-    handleAbrirCaja,
-    handleAbrirPacaLaminas,
-    handleAbrirPacaAlbumes,
-    formatCOP
+    handleDesglosar,
+    handleVincularProducto,
+    handleActualizarInventario,
+    handleEliminarInventario,
+    fetchProductosAndLotes,
+    formatCOP,
+    inversionTotalVal
   } = useInventario();
 
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [showVincularModal, setShowVincularModal] = useState(false);
+  const [editingInventario, setEditingInventario] = useState(null);
 
   // Buscar el producto activo de la lista actualizada para refrescar existencias al operar dentro del modal
   const activeProduct = productosAgrupados.find(
@@ -36,7 +46,21 @@ function InventarioPage() {
           <p className="text-xs text-carbon-500 font-medium">
             Gestión flexible de stock real por niveles (Pacas, Cajas, Sobres/Unidades)
           </p>
+          {currentUser?.rol === 'DUENO' && (
+            <p className="text-sm font-mono text-emerald-400 font-bold mt-1.5 animate-fadeIn">
+              Valor Total Stock: {formatCOP(inversionTotalVal)}
+            </p>
+          )}
         </div>
+        {currentUser?.rol === 'DUENO' && (
+          <button
+            onClick={() => setShowVincularModal(true)}
+            className="flex items-center gap-2 bg-neonGreen hover:bg-neonGreen/80 text-black px-4 py-2 rounded-xl text-xs font-sports font-bold tracking-wider transition-all shadow-md shadow-neonGreen/10"
+          >
+            <Plus size={16} />
+            Agregar Producto a Sede
+          </button>
+        )}
       </div>
 
       {/* Info Boxes: Conversion Rules */}
@@ -55,7 +79,6 @@ function InventarioPage() {
       <InventarioGrid
         productosAgrupados={productosAgrupados}
         loading={loading}
-        onAbrirCaja={handleAbrirCaja}
         onSelectProduct={(p) => setSelectedProductId(p.producto.id)}
       />
 
@@ -63,13 +86,41 @@ function InventarioPage() {
       {activeProduct && (
         <LotesDesgloseModal
           groupedProduct={activeProduct}
+          currentUser={currentUser}
           onClose={() => setSelectedProductId(null)}
-          onAbrirCaja={handleAbrirCaja}
-          onAbrirPacaLaminas={handleAbrirPacaLaminas}
-          onAbrirPacaAlbumes={handleAbrirPacaAlbumes}
+          onDesglosar={handleDesglosar}
+          onEditClick={(inv) => setEditingInventario(inv)}
+          onDeleteClick={async (id) => {
+            if (window.confirm("¿Estás seguro de que deseas desvincular este producto de la sede? Se perderán las existencias locales.")) {
+              try {
+                await handleEliminarInventario(id);
+                setSelectedProductId(null); // Close modal
+              } catch (err) {
+                // error is handled by hooks
+              }
+            }
+          }}
           formatCOP={formatCOP}
         />
       )}
+
+      {/* Vincular Producto Modal */}
+      <VincularProductoModal
+        isOpen={showVincularModal}
+        onClose={() => setShowVincularModal(false)}
+        onVincular={handleVincularProducto}
+        productos={productos}
+        lotes={lotes}
+        fetchProductosAndLotes={fetchProductosAndLotes}
+      />
+
+      {/* Editar Inventario Modal */}
+      <EditarInventarioModal
+        isOpen={!!editingInventario}
+        onClose={() => setEditingInventario(null)}
+        onSave={handleActualizarInventario}
+        inventario={editingInventario}
+      />
     </div>
   );
 }

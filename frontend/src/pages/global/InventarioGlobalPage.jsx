@@ -6,6 +6,7 @@ import { Boxes } from 'lucide-react';
 function InventarioGlobalPage() {
   const {
     inventarioGlobal,
+    sedes,
     totales,
     loading,
     error,
@@ -14,6 +15,7 @@ function InventarioGlobalPage() {
     handleCrearProducto,
     handleEditarProducto,
     handleEliminarProducto,
+    handleAbrirCaja,
     formatCOP
   } = useInventarioGlobal();
 
@@ -33,6 +35,7 @@ function InventarioGlobalPage() {
 
       <InventarioGlobal
         inventarioGlobal={inventarioGlobal}
+        sedes={sedes}
         totales={totales}
         loading={loading}
         error={error}
@@ -41,6 +44,7 @@ function InventarioGlobalPage() {
         onCrearProducto={handleCrearProducto}
         onEditarProducto={handleEditarProducto}
         onEliminarProducto={handleEliminarProducto}
+        onAbrirCaja={handleAbrirCaja}
         formatCOP={formatCOP}
       />
     </div>

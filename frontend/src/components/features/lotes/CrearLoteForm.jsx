@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import InversionistaCampos from './InversionistaCampos';
 import CostoCantidadCampos from './CostoCantidadCampos';
+import CustomSelect from '../../common/CustomSelect';
 
 function CrearLoteForm({
   productos,
@@ -32,6 +33,19 @@ function CrearLoteForm({
   setCostoUnidad,
   handleCrearLote
 }) {
+  const financiadorOptions = [
+    { value: 'DUENO_A', label: 'DUENO_A' },
+    { value: 'DUENO_B', label: 'DUENO_B' },
+    { value: 'INVERSIONISTA_EXTERNO', label: 'INVERSIONISTA_EXTERNO' }
+  ];
+
+  const productoOptions = productos
+    .filter(p => p.tipo !== 'COMBO')
+    .map(p => ({
+      value: p.id.toString(),
+      label: `${p.nombre} (${p.tipo})`
+    }));
+
   return (
     <div className="glass-panel p-6 space-y-4">
       <h3 className="text-base font-sports font-bold text-white flex items-center gap-2 border-b border-carbon-800 pb-3">
@@ -39,6 +53,7 @@ function CrearLoteForm({
       </h3>
 
       <form onSubmit={handleCrearLote} className="space-y-4">
+        {/* Nombre Lote */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">IDENTIFICADOR / NOMBRE DE LOTE</label>
           <input
@@ -46,24 +61,23 @@ function CrearLoteForm({
             placeholder="Ej. Importacion Albumes Qatar Mayo 2026"
             value={nombreLote}
             onChange={(e) => setNombreLote(e.target.value)}
-            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-neonCyan"
+            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-neonCyan font-semibold"
             required
           />
         </div>
 
+        {/* Financiador */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">ORIGEN DE CAPITAL (FINANCIADOR)</label>
-          <select
+          <CustomSelect
+            options={financiadorOptions}
             value={financiador}
-            onChange={(e) => setFinanciador(e.target.value)}
-            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-neonCyan"
-          >
-            <option value="DUENO_A">Dueño A (Fondo A)</option>
-            <option value="DUENO_B">Dueño B (Fondo B)</option>
-            <option value="INVERSIONISTA_EXTERNO">Inversionista Externo / Deuda</option>
-          </select>
+            onChange={(val) => setFinanciador(val)}
+            placeholder="Seleccionar Origen"
+          />
         </div>
 
+        {/* Inversionista Campos */}
         {financiador === 'INVERSIONISTA_EXTERNO' && (
           <InversionistaCampos
             nombreInversionista={nombreInversionista}
@@ -75,21 +89,18 @@ function CrearLoteForm({
           />
         )}
 
+        {/* Producto */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">PRODUCTO A INGRESAR</label>
-          <select
+          <CustomSelect
+            options={productoOptions}
             value={productoId}
-            onChange={(e) => setProductoId(e.target.value)}
-            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-neonCyan"
-            required
-          >
-            <option value="">Selecciona un producto</option>
-            {productos.filter(p => p.tipo !== 'COMBO').map(p => (
-              <option key={p.id} value={p.id}>{p.nombre} ({p.tipo})</option>
-            ))}
-          </select>
+            onChange={(val) => setProductoId(val)}
+            placeholder="Selecciona un producto"
+          />
         </div>
 
+        {/* Costos y Cantidades */}
         <CostoCantidadCampos
           cantPacas={cantPacas}
           setCantPacas={setCantPacas}
@@ -105,6 +116,7 @@ function CrearLoteForm({
           setCostoUnidad={setCostoUnidad}
         />
 
+        {/* Submit */}
         <button
           type="submit"
           disabled={loading}

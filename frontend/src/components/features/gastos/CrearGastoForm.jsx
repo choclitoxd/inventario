@@ -1,5 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
+import NumericStepper from '../../common/NumericStepper';
+import CustomSelect from '../../common/CustomSelect';
 
 function CrearGastoForm({
   descripcion,
@@ -14,6 +16,21 @@ function CrearGastoForm({
   loading,
   onSubmit
 }) {
+  const categoriaOptions = [
+    { value: 'FLETE', label: 'FLETE' },
+    { value: 'TRANSPORTE', label: 'TRANSPORTE' },
+    { value: 'ALIMENTACION', label: 'ALIMENTACION' },
+    { value: 'OTRO', label: 'OTRO' }
+  ];
+
+  const loteOptions = [
+    { value: '', label: 'Gasto General (Ningún lote)' },
+    ...(lotes || []).map(lote => ({
+      value: lote.id.toString(),
+      label: `${lote.nombreLote} (${lote.financiador})`
+    }))
+  ];
+
   return (
     <div className="lg:col-span-1 glass-panel p-6 space-y-4">
       <h3 className="text-base font-sports font-bold text-white flex items-center gap-2 border-b border-carbon-800 pb-3">
@@ -24,49 +41,32 @@ function CrearGastoForm({
         {/* Monto del Gasto */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">VALOR DEL GASTO (COP)</label>
-          <div className="relative">
-            <span className="absolute left-3 top-2.5 text-zinc-500 font-bold text-xs">COP</span>
-            <input
-              type="number"
-              placeholder="Ej. 15000"
-              value={monto}
-              onChange={(e) => setMonto(e.target.value)}
-              className="bg-carbon-800 border border-carbon-700 rounded-xl pl-12 pr-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-red-500 w-full font-semibold"
-              required
-            />
-          </div>
+          <NumericStepper
+            value={parseInt(monto) || 0}
+            onChange={(val) => setMonto(val.toString())}
+          />
         </div>
 
         {/* Categoría */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">CATEGORÍA DE EGRESO</label>
-          <select
+          <CustomSelect
+            options={categoriaOptions}
             value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
-            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-red-500 w-full font-semibold"
-          >
-            <option value="FLETE">Flete / Envíos</option>
-            <option value="TRANSPORTE">Transporte / Gasolina</option>
-            <option value="ALIMENTACION">Alimentación / Refrigerios</option>
-            <option value="OTRO">Otro / Imprevistos</option>
-          </select>
+            onChange={(val) => setCategoria(val)}
+            placeholder="Seleccionar Categoría"
+          />
         </div>
 
         {/* Lote Inversionista (opcional) */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-bold text-carbon-500">ASOCIAR A UN LOTE (OPCIONAL)</label>
-          <select
-            value={loteInversionistaId}
-            onChange={(e) => setLoteInversionistaId(e.target.value)}
-            className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-red-500 w-full font-semibold"
-          >
-            <option value="">Gasto General (Ningún lote)</option>
-            {lotes.map(lote => (
-              <option key={lote.id} value={lote.id}>
-                {lote.nombreLote} ({lote.financiador === 'DUENO_A' ? 'Fondo A' : lote.financiador === 'DUENO_B' ? 'Fondo B' : 'Externo'})
-              </option>
-            ))}
-          </select>
+          <CustomSelect
+            options={loteOptions}
+            value={loteInversionistaId || ''}
+            onChange={(val) => setLoteInversionistaId(val)}
+            placeholder="Seleccionar Lote"
+          />
           <span className="text-[9px] text-carbon-500 font-medium mt-1 leading-normal">
             Asociar a un lote permite rastrear este egreso directamente contra la utilidad de esa financiación específica.
           </span>

@@ -2,9 +2,9 @@ import React from 'react';
 
 const quickUsers = [
   { username: 'donato', nombre: 'Donato', rol: 'ADMIN', color: 'border-neonGreen text-neonGreen bg-neonGreen/10' },
-  { username: 'giank', nombre: 'Giank', rol: 'JEFE', color: 'border-neonCyan text-neonCyan bg-neonCyan/10' },
-  { username: 'vector', nombre: 'Vector', rol: 'VENDEDOR', color: 'border-purple-500 text-purple-400 bg-purple-500/10' },
-  { username: 'chefcito', nombre: 'Chefcito', rol: 'VENDEDOR', color: 'border-amber-500 text-amber-400 bg-amber-500/10' }
+  { username: 'giank', nombre: 'Giank', rol: 'DUENO', color: 'border-neonCyan text-neonCyan bg-neonCyan/10' },
+  { username: 'vector', nombre: 'Vector', rol: 'ORGANIZADOR', color: 'border-purple-500 text-purple-400 bg-purple-500/10' },
+  { username: 'chefcito', nombre: 'Chefcito', rol: 'ORGANIZADOR', color: 'border-amber-500 text-amber-400 bg-amber-500/10' }
 ];
 
 function QuickLoginGrid({ onSelectQuickUser }) {

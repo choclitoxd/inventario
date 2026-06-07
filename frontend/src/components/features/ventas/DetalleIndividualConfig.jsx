@@ -1,5 +1,6 @@
 import React from 'react';
 import PrecioSugeridoButtons from './PrecioSugeridoButtons';
+import NumericStepper from '../../common/NumericStepper';
 
 function DetalleIndividualConfig({
   idx,
@@ -19,20 +20,14 @@ function DetalleIndividualConfig({
       {fields.map(({ label, qField, pLabel, pField, suggestions }) => (
         <div key={qField} className="space-y-1">
           <label className="text-[9px] font-bold text-carbon-500">{label}</label>
-          <input
-            type="number"
-            min="0"
-            value={item[qField] || 0}
-            onChange={(e) => handleUpdateItem(idx, qField, Number(e.target.value))}
-            className="w-full bg-carbon-800 border border-carbon-700 rounded-xl px-2 py-1.5 text-xs text-zinc-100 focus:outline-none"
+          <NumericStepper
+            value={Number(item[qField]) || 0}
+            onChange={(val) => handleUpdateItem(idx, qField, val)}
           />
           <label className="text-[9px] font-bold text-carbon-500 block mt-2">{pLabel}</label>
-          <input
-            type="number"
-            min="0"
-            value={item[pField] || 0}
-            onChange={(e) => handleUpdateItem(idx, pField, Number(e.target.value))}
-            className="w-full bg-carbon-800 border border-carbon-700 rounded-xl px-2 py-1.5 text-xs text-zinc-100 focus:outline-none"
+          <NumericStepper
+            value={Number(item[pField]) || 0}
+            onChange={(val) => handleUpdateItem(idx, pField, val)}
           />
           <PrecioSugeridoButtons
             precios={suggestions}

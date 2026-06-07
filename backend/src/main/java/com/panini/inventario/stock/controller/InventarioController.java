@@ -34,6 +34,20 @@ public class InventarioController {
         return inventarioRepository.findAll();
     }
 
+    @PostMapping("/desglosar")
+    public ResponseEntity<Inventario> desglosar(
+            @RequestParam Integer productoId,
+            @RequestParam Integer loteId,
+            @RequestParam String accion,
+            @RequestHeader(value = "X-User-Username", required = false) String username) {
+        try {
+            Inventario inv = inventarioService.desglosar(productoId, loteId, accion, username);
+            return ResponseEntity.ok(inv);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
     @PostMapping("/{id}/abrir-caja")
     public ResponseEntity<Inventario> abrirCaja(
             @PathVariable Integer id,

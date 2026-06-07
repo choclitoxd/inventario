@@ -113,7 +113,7 @@ function useSedesManagement() {
   };
 
   // Filter lists of users to get JEFEs only (excluding ADMIN role)
-  const jefesOnly = usuarios.filter(u => u.rol === 'JEFE');
+  const jefesOnly = usuarios.filter(u => u.rol === 'DUENO');
 
   // Filter sedes list based on search and owner
   const filteredSedes = sedes.filter(sede => {

@@ -48,8 +48,8 @@ function UsuariosTable({
             >
               <option value="">Todos los roles</option>
               <option value="ADMIN">ADMIN</option>
-              <option value="JEFE">JEFE</option>
-              <option value="VENDEDOR">VENDEDOR</option>
+              <option value="DUENO">JEFE/DUEÑO</option>
+              <option value="ORGANIZADOR">ORGANIZADOR</option>
             </select>
           </div>
         </div>
@@ -75,7 +75,7 @@ function UsuariosTable({
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded border text-[9px] font-bold ${
                       user.rol === 'ADMIN' ? 'bg-neonCyan/10 border-neonCyan/20 text-neonCyan' :
-                      user.rol === 'JEFE' ? 'bg-neonGreen/10 border-neonGreen/20 text-neonGreen' :
+                      user.rol === 'DUENO' ? 'bg-neonGreen/10 border-neonGreen/20 text-neonGreen' :
                       'bg-purple-500/10 border-purple-500/20 text-purple-400'
                     }`}>
                       {user.rol}

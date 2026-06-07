@@ -5,7 +5,8 @@ function ProductoForm({ onSubmit, loading }) {
   const [formData, setFormData] = useState({
     nombre: '',
     edicionColeccion: '',
-    tipo: 'FRACCIONADO_COMPLEJO',
+    tipo: 'FRACCIONADO_LAMINAS',
+    factorConversion: '26',
     codigoBarras: '',
     precioSugeridoDefecto: ''
   });
@@ -15,9 +16,10 @@ function ProductoForm({ onSubmit, loading }) {
     if (!formData.nombre.trim()) return;
     onSubmit({
       ...formData,
-      precioSugeridoDefecto: formData.precioSugeridoDefecto ? parseFloat(formData.precioSugeridoDefecto) : null
+      precioSugeridoDefecto: formData.precioSugeridoDefecto ? parseFloat(formData.precioSugeridoDefecto) : null,
+      factorConversion: formData.tipo === 'FRACCIONADO_ALBUMES' && formData.factorConversion ? parseInt(formData.factorConversion) : null
     });
-    setFormData({ nombre: '', edicionColeccion: '', tipo: 'FRACCIONADO_COMPLEJO', codigoBarras: '', precioSugeridoDefecto: '' });
+    setFormData({ nombre: '', edicionColeccion: '', tipo: 'FRACCIONADO_LAMINAS', factorConversion: '26', codigoBarras: '', precioSugeridoDefecto: '' });
   };
 
   return (
@@ -59,10 +61,24 @@ function ProductoForm({ onSubmit, loading }) {
             onChange={(e) => setFormData({ ...formData, tipo: e.target.value })}
             className="w-full bg-carbon-950 border border-carbon-850 hover:border-carbon-700 focus:border-neonGreen/50 px-3 py-2 rounded-xl text-xs text-white focus:outline-none transition-all"
           >
-            <option value="FRACCIONADO_COMPLEJO">Láminas (Paca/Caja/Sobre)</option>
-            <option value="UNIDADES_SIMPLES">Unidades Simples (Álbum/Combo/Mercancía)</option>
+            <option value="FRACCIONADO_LAMINAS">Láminas (Paca / Caja / Sobre)</option>
+            <option value="FRACCIONADO_ALBUMES">Álbumes (Caja / Unidad)</option>
+            <option value="UNIDAD_SIMPLE">Mercancía General (Unidades Sueltas)</option>
           </select>
         </div>
+        {formData.tipo === 'FRACCIONADO_ALBUMES' && (
+          <div>
+            <label className="text-[10px] text-carbon-450 font-bold uppercase block mb-1">Factor (Álbumes/Caja)</label>
+            <input
+              required
+              type="number"
+              value={formData.factorConversion}
+              onChange={(e) => setFormData({ ...formData, factorConversion: e.target.value })}
+              placeholder="Ej: 26 o 24"
+              className="w-full bg-carbon-950 border border-carbon-850 hover:border-carbon-700 focus:border-neonGreen/50 px-3 py-2 rounded-xl text-xs text-white focus:outline-none transition-all"
+            />
+          </div>
+        )}
         <div>
           <label className="text-[10px] text-carbon-450 font-bold uppercase block mb-1">Código de Barras / ID</label>
           <input

@@ -12,6 +12,7 @@ import java.util.List;
 public interface VentaDetalleRepository extends JpaRepository<VentaDetalle, Integer> {
     List<VentaDetalle> findByVentaId(Integer ventaId);
     long countByProductoId(Integer productoId);
+    long countByInventarioId(Integer inventarioId);
 
     @Query("SELECT vd.precioVentaPaca FROM VentaDetalle vd WHERE vd.producto.id = :productoId AND vd.venta.negocio.id = :negocioId AND vd.precioVentaPaca IS NOT NULL AND vd.precioVentaPaca > 0 GROUP BY vd.precioVentaPaca ORDER BY COUNT(vd) DESC")
     List<BigDecimal> findSuggestedPricesPaca(Integer productoId, Integer negocioId, Pageable pageable);

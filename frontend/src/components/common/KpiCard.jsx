@@ -1,6 +1,6 @@
 import React from 'react';
 
-function KpiCard({ title, value, subtext, icon: Icon, accentColor = 'green', glowColor = 'rgba(57, 255, 20, 0.05)' }) {
+function KpiCard({ title, value, subtext, icon: Icon, accentColor = 'green', glowColor = 'rgba(57, 255, 20, 0.05)', valueClass = 'font-sports font-bold text-white' }) {
   // Configurar clases dinámicas de neón y colores
   const colorMap = {
     green: {
@@ -39,7 +39,7 @@ function KpiCard({ title, value, subtext, icon: Icon, accentColor = 'green', glo
           <Icon size={18} />
         </div>
       </div>
-      <h3 className="text-2xl font-sports font-bold text-white">{value}</h3>
+      <h3 className={`text-2xl ${valueClass}`}>{value}</h3>
       <span className={`text-xs font-semibold flex items-center gap-1 mt-2 ${selectedColor.text}`}>
         {subtext}
       </span>

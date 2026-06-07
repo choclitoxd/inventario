@@ -4,6 +4,7 @@ import { api } from '../services/api';
 function useInventarioGlobal() {
   const [inventarioGlobal, setInventarioGlobal] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [sedes, setSedes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
@@ -13,12 +14,14 @@ function useInventarioGlobal() {
     setLoading(true);
     setError(null);
     try {
-      const [invData, prodData] = await Promise.all([
+      const [invData, prodData, sedesData] = await Promise.all([
         api.obtenerInventarioGlobal(),
-        api.listarProductos()
+        api.listarProductos(),
+        api.listarNegocios().catch(() => [])
       ]);
       setInventarioGlobal(invData || []);
       setProductos(prodData || []);
+      setSedes(sedesData || []);
     } catch (err) {
       console.error(err);
       setError('Error al cargar el inventario consolidado y catálogo.');
@@ -79,6 +82,24 @@ function useInventarioGlobal() {
     }
   };
 
+  const handleAbrirCaja = async (productoId, negocioId) => {
+    setSubmitting(true);
+    setError(null);
+    setSuccessMsg('');
+    try {
+      await api.abrirCaja(productoId, {
+        headers: { 'X-Negocio-Id': negocioId }
+      });
+      setSuccessMsg('¡Caja abierta exitosamente!');
+      await fetchGlobalData();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al abrir la caja.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Calcular totales dinámicos globales
   const totales = useMemo(() => {
     const totalPacas = inventarioGlobal.reduce((acc, curr) => acc + (curr.cantActualPacas || 0), 0);
@@ -100,6 +121,7 @@ function useInventarioGlobal() {
   return {
     inventarioGlobal,
     productos,
+    sedes,
     totales,
     loading,
     error,
@@ -110,6 +132,7 @@ function useInventarioGlobal() {
     handleCrearProducto,
     handleEditarProducto,
     handleEliminarProducto,
+    handleAbrirCaja,
     formatCOP,
     refresh: fetchGlobalData
   };

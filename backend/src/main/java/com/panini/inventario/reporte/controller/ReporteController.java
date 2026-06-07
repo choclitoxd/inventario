@@ -3,6 +3,7 @@ package com.panini.inventario.reporte.controller;
 import com.panini.inventario.reporte.service.ReporteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.List;
 @RequestMapping("/api/reportes")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasRole('DUENO')")
 public class ReporteController {
 
     private final ReporteService reporteService;

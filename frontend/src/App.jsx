@@ -49,7 +49,7 @@ function LoginRouteWrapper({ currentUser, currentNegocio, onLoginSuccess }) {
     if (!currentNegocio) {
       return <Navigate to="/admin/seleccion-negocio" replace />;
     }
-    if (currentUser.rol === 'VENDEDOR') {
+    if (currentUser.rol === 'ORGANIZADOR') {
       return <Navigate to="/admin/inventario" replace />;
     }
     return <Navigate to="/admin/dashboard" replace />;
@@ -110,7 +110,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
         borderSideColor: 'border-neonCyan' 
       });
     } else {
-      if (currentNegocio && currentUser.rol === 'JEFE') {
+      if (currentNegocio && currentUser.rol === 'DUENO') {
         items.push({ 
           id: 'dashboard', 
           label: 'Dashboard', 
@@ -140,7 +140,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
         });
       }
       
-      if (currentNegocio && currentUser.rol === 'JEFE') {
+      if (currentNegocio && currentUser.rol === 'DUENO') {
         items.push({ 
           id: 'lotes', 
           label: 'Lotes/Deudas', 
@@ -407,7 +407,7 @@ function AppRoutes() {
     setCurrentNegocio(negocio);
     localStorage.setItem('active_negocio_id', negocio.id.toString());
     localStorage.setItem('active_negocio_nombre', negocio.nombre);
-    if (currentUser.rol === 'VENDEDOR') {
+    if (currentUser.rol === 'ORGANIZADOR') {
       navigate('/admin/inventario');
     } else {
       navigate('/admin/dashboard');
@@ -507,13 +507,13 @@ function AppRoutes() {
             />
           }
         >
-          {/* Vistas restringidas a administradores y jefes */}
+          {/* Vistas restringidas a administradores y dueños */}
           <Route 
             element={
               <ProtectedRoute 
                 currentUser={currentUser} 
                 currentNegocio={currentNegocio} 
-                allowedRoles={['ADMIN', 'JEFE']} 
+                allowedRoles={['ADMIN', 'DUENO']} 
               />
             }
           >
@@ -522,8 +522,8 @@ function AppRoutes() {
             <Route path="/admin/gastos" element={<GastosPage />} />
           </Route>
 
-          {/* Vistas accesibles por todos (ADMIN, JEFE, VENDEDOR) */}
-          <Route path="/admin/inventario" element={<InventarioPage />} />
+          {/* Vistas accesibles por todos (ADMIN, DUENO, ORGANIZADOR) */}
+          <Route path="/admin/inventario" element={<InventarioPage currentUser={currentUser} />} />
           <Route path="/admin/nueva-venta" element={<VentaCheckoutPage />} />
         </Route>
       </Route>

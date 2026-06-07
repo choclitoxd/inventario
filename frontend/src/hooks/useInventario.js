@@ -1,11 +1,28 @@
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
+import { formatCurrency } from '../utils/format';
 
 function useInventario() {
   const [inventarios, setInventarios] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [lotes, setLotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
+
+  const fetchProductosAndLotes = async () => {
+    try {
+      const [prods, lts] = await Promise.all([
+        api.listarProductos(),
+        api.listarLotes()
+      ]);
+      setProductos(prods || []);
+      setLotes(lts || []);
+    } catch (err) {
+      console.error(err);
+      setError('Error al obtener la lista de productos o lotes del catálogo.');
+    }
+  };
 
   const fetchInventario = async () => {
     setLoading(true);
@@ -25,48 +42,59 @@ function useInventario() {
     fetchInventario();
   }, []);
 
-  const handleAbrirCaja = async (productoId) => {
+  const handleDesglosar = async (productoId, loteId, accion) => {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.abrirCaja(productoId);
-      setSuccessMsg('¡Caja abierta con éxito! Se descontó 1 caja de láminas y se sumaron 104 sobres al stock.');
+      await api.desglosarInventario(productoId, loteId, accion);
+      setSuccessMsg(`¡Desglose de ${accion.toLowerCase()} ejecutado con éxito para este lote!`);
       await fetchInventario();
     } catch (err) {
-      setError(err.message || 'Error al ejecutar la acción de abrir caja.');
+      setError(err.message || 'Error al ejecutar el desglose de stock.');
     }
   };
 
-  const handleAbrirPacaLaminas = async (inventarioId) => {
+  const handleVincularProducto = async (dto) => {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.abrirPacaLaminas(inventarioId);
-      setSuccessMsg('¡Paca de láminas desempacada con éxito! Se descontó 1 paca y se sumaron 10 cajas al stock.');
+      await api.vincularProductoInventario(dto);
+      setSuccessMsg('¡Producto vinculado con éxito a la sede!');
       await fetchInventario();
     } catch (err) {
-      setError(err.message || 'Error al abrir paca de láminas.');
+      setError(err.message || 'Error al vincular el producto a la sede.');
+      throw err;
     }
   };
 
-  const handleAbrirPacaAlbumes = async (inventarioId) => {
+  const handleActualizarInventario = async (id, dto) => {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.abrirPacaAlbumes(inventarioId);
-      setSuccessMsg('¡Paca de álbumes desempacada con éxito! Se descontó 1 paca y se sumaron 26 álbumes sueltos al stock.');
+      await api.actualizarInventarioSede(id, dto);
+      setSuccessMsg('¡Inventario y costos actualizados con éxito!');
       await fetchInventario();
     } catch (err) {
-      setError(err.message || 'Error al abrir paca de álbumes.');
+      setError(err.message || 'Error al actualizar el inventario.');
+      throw err;
+    }
+  };
+
+  const handleEliminarInventario = async (id) => {
+    try {
+      setSuccessMsg('');
+      setError(null);
+      await api.eliminarInventarioSede(id);
+      setSuccessMsg('¡Producto desvinculado de la sede con éxito!');
+      await fetchInventario();
+    } catch (err) {
+      setError(err.message || 'Error al eliminar el producto de la sede.');
+      throw err;
     }
   };
 
   const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(val || 0);
+    return formatCurrency(val);
   };
 
   // Agrupar inventario por producto
@@ -92,19 +120,36 @@ function useInventario() {
     return Object.values(map);
   }, [inventarios]);
 
+  // Calcular valorización total de inventario de la sede
+  const inversionTotalVal = useMemo(() => {
+    return inventarios.reduce((sum, inv) => {
+      const p = inv.producto;
+      const isAlbumes = p?.tipo === 'FRACCIONADO_ALBUMES' || p?.tipo === 'ALBUM';
+      const pacaCost = (inv.cantActualPacas || 0) * (inv.costoCompraPaca || 0);
+      const cajaCost = isAlbumes ? 0 : (inv.cantActualCajas || 0) * (inv.costoCompraCaja || 0);
+      const unidadCost = (inv.cantActualUnidades || 0) * (inv.costoCompraUnidad || 0);
+      return sum + pacaCost + cajaCost + unidadCost;
+    }, 0);
+  }, [inventarios]);
+
   return {
     inventarios,
     productosAgrupados,
+    productos,
+    lotes,
     loading,
     error,
     setError,
     successMsg,
     setSuccessMsg,
-    handleAbrirCaja,
-    handleAbrirPacaLaminas,
-    handleAbrirPacaAlbumes,
+    handleDesglosar,
+    handleVincularProducto,
+    handleActualizarInventario,
+    handleEliminarInventario,
+    fetchProductosAndLotes,
     formatCOP,
-    fetchInventario
+    fetchInventario,
+    inversionTotalVal
   };
 }
 

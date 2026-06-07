@@ -52,3 +52,13 @@
 .glow-green-intense {
   box-shadow: 0 0 25px rgba(57, 255, 20, 0.35);
 }
+
+/* Ocultar flechas nativas en input[type="number"] */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

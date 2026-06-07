@@ -22,7 +22,7 @@ function useAdminDB() {
     username: '',
     password: '',
     nombre: '',
-    rol: 'VENDEDOR'
+    rol: 'ORGANIZADOR'
   });
   const [userLoading, setUserLoading] = useState(false);
   const [userSuccess, setUserSuccess] = useState(false);
@@ -217,7 +217,7 @@ function useAdminDB() {
         rol: form.rol
       });
       setUserSuccess(true);
-      setUserForm({ username: '', password: '', nombre: '', rol: 'VENDEDOR' });
+      setUserForm({ username: '', password: '', nombre: '', rol: 'ORGANIZADOR' });
       fetchStatsAndLists();
       fetchAuditLogs();
     } catch (err) {

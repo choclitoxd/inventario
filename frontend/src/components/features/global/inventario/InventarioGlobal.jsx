@@ -8,6 +8,7 @@ import { Sparkles } from 'lucide-react';
 
 function InventarioGlobal({
   inventarioGlobal,
+  sedes = [],
   totales,
   loading,
   error,
@@ -16,6 +17,7 @@ function InventarioGlobal({
   onCrearProducto,
   onEditarProducto,
   onEliminarProducto,
+  onAbrirCaja,
   formatCOP
 }) {
   const [editingProduct, setEditingProduct] = useState(null);
@@ -40,9 +42,11 @@ function InventarioGlobal({
       {/* Tabla de Stock Consolidado Multisede */}
       <InventarioMaestroTable
         inventarioGlobal={inventarioGlobal}
+        sedes={sedes}
         loading={loading}
         onEdit={setEditingProduct}
         onDelete={onEliminarProducto}
+        onAbrirCaja={onAbrirCaja}
         formatCOP={formatCOP}
       />
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, RefreshCw } from 'lucide-react';
+import { Calendar, RefreshCw, Download } from 'lucide-react';
 
 function DashboardFilters({ 
   filterType, 
@@ -8,7 +8,9 @@ function DashboardFilters({
   setFechaDesde, 
   fechaHasta, 
   setFechaHasta, 
-  onRefresh 
+  onRefresh,
+  onExport,
+  exporting
 }) {
   return (
     <div className="space-y-4">
@@ -37,8 +39,22 @@ function DashboardFilters({
           </div>
           
           <button 
+            onClick={onExport}
+            disabled={exporting}
+            className="bg-neonGreen hover:bg-neonGreen/80 disabled:bg-carbon-800 disabled:text-carbon-600 text-black font-sports font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-md shadow-neon-green/20"
+            title="Exportar Informe Contable (.XLSX)"
+          >
+            {exporting ? (
+              <div className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download size={14} />
+            )}
+            <span>Exportar Excel</span>
+          </button>
+
+          <button 
             onClick={onRefresh}
-            className="bg-carbon-800 hover:bg-carbon-700 text-zinc-100 border border-carbon-700 p-2 rounded-xl transition-all"
+            className="bg-carbon-800 hover:bg-carbon-700 text-zinc-100 border border-carbon-700 p-2.5 rounded-xl transition-all"
             title="Refrescar datos"
           >
             <RefreshCw size={16} />

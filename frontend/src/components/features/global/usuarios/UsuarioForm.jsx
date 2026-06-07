@@ -66,8 +66,8 @@ function UsuarioForm({
               onChange={(e) => setUserForm({ ...userForm, rol: e.target.value })}
               className="bg-carbon-900 border border-carbon-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-neonGreen w-full font-semibold"
             >
-              <option value="VENDEDOR">VENDEDOR (Operativo)</option>
-              <option value="JEFE">JEFE (Administración local)</option>
+              <option value="ORGANIZADOR">ORGANIZADOR (Operativo)</option>
+              <option value="DUENO">JEFE/DUEÑO (Administración local)</option>
               <option value="ADMIN">ADMIN (Control global)</option>
             </select>
           </div>

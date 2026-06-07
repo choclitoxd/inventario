@@ -15,7 +15,7 @@ function useUsuariosManagement() {
     username: '',
     password: '',
     nombre: '',
-    rol: 'VENDEDOR'
+    rol: 'ORGANIZADOR'
   });
 
   // Filters state
@@ -75,7 +75,7 @@ function useUsuariosManagement() {
         username: '',
         password: '',
         nombre: '',
-        rol: 'VENDEDOR'
+        rol: 'ORGANIZADOR'
       });
       await loadData();
     } catch (err) {

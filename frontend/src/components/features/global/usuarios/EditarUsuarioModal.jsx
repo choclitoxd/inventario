@@ -9,13 +9,13 @@ function EditarUsuarioModal({
   loading
 }) {
   const [nombre, setNombre] = useState('');
-  const [rol, setRol] = useState('VENDEDOR');
+  const [rol, setRol] = useState('ORGANIZADOR');
   const [password, setPassword] = useState('');
 
   useEffect(() => {
     if (usuario) {
       setNombre(usuario.nombre || '');
-      setRol(usuario.rol || 'VENDEDOR');
+      setRol(usuario.rol || 'ORGANIZADOR');
       setPassword('');
     }
   }, [usuario]);
@@ -61,8 +61,8 @@ function EditarUsuarioModal({
               onChange={(e) => setRol(e.target.value)}
               className="bg-carbon-800 border border-carbon-700 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-neonCyan w-full font-semibold"
             >
-              <option value="VENDEDOR">VENDEDOR (Operativo)</option>
-              <option value="JEFE">JEFE (Administración local)</option>
+              <option value="ORGANIZADOR">ORGANIZADOR (Operativo)</option>
+              <option value="DUENO">JEFE/DUEÑO (Administración local)</option>
               <option value="ADMIN">ADMIN (Control global)</option>
             </select>
           </div>

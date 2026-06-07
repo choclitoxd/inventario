@@ -24,6 +24,9 @@ public class Producto {
     @Column(nullable = false)
     private Tipo tipo;
 
+    @Column(name = "factor_conversion")
+    private Integer factorConversion;
+
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
@@ -47,6 +50,6 @@ public class Producto {
     }
 
     public enum Tipo {
-        FRACCIONADO_COMPLEJO, UNIDADES_SIMPLES
+        FRACCIONADO_LAMINAS, FRACCIONADO_ALBUMES, UNIDAD_SIMPLE
     }
 }

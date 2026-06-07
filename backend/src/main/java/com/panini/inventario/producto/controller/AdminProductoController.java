@@ -43,6 +43,10 @@ public class AdminProductoController {
             producto.setPrecioSugeridoDefecto(productoDetails.getPrecioSugeridoDefecto());
         }
 
+        if (productoDetails.getFactorConversion() != null) {
+            producto.setFactorConversion(productoDetails.getFactorConversion());
+        }
+
         Producto guardado = productoRepository.save(producto);
         return ResponseEntity.ok(guardado);
     }
