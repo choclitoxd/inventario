@@ -2,9 +2,9 @@ spring:
   application:
     name: panini-inventario
   datasource:
-    url: jdbc:mariadb://localhost:3306/panini_db
-    username: root
-    password: rootpassword
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/panini_db}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:rootpassword}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
