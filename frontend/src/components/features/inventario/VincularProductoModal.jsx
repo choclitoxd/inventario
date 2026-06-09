@@ -47,8 +47,6 @@ function VincularProductoModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const selectedProduct = productos.find(p => p.id === parseInt(productoId));
   const isLaminas = selectedProduct?.tipo === 'FRACCIONADO_LAMINAS' || selectedProduct?.tipo === 'LAMINAS';
   const isAlbumes = selectedProduct?.tipo === 'FRACCIONADO_ALBUMES' || selectedProduct?.tipo === 'ALBUM';
@@ -139,6 +137,8 @@ function VincularProductoModal({
       setLoadingForm(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn">
