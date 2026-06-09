@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getDefaultRoute } from '../App';
 
 const AuthContext = createContext(null);
 
@@ -31,7 +32,7 @@ export function AuthProvider({ children }) {
     if (user.rol === 'ADMIN') {
       navigate('/admin/global/database');
     } else {
-      navigate('/admin/seleccion-negocio');
+      navigate('/seleccion-negocio');
     }
   };
 
@@ -48,11 +49,7 @@ export function AuthProvider({ children }) {
     setCurrentNegocio(negocio);
     localStorage.setItem('active_negocio_id', negocio.id.toString());
     localStorage.setItem('active_negocio_nombre', negocio.nombre);
-    if (currentUser?.rol === 'ORGANIZADOR') {
-      navigate('/admin/inventario');
-    } else {
-      navigate('/admin/dashboard');
-    }
+    navigate(getDefaultRoute(currentUser?.rol));
   };
 
   const bypassAdminDB = () => {

@@ -45,7 +45,18 @@ import InventarioGlobalPage from './pages/global/InventarioGlobalPage';
 // Import Context
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// 1. Wrapper para redirigir desde Login si ya está autenticado
+// ─────────────────────────────────────────────────────────────
+// Utilidad: ruta base por defecto según rol
+// ─────────────────────────────────────────────────────────────
+export function getDefaultRoute(rol) {
+  if (rol === 'ADMIN') return '/admin/global/database';
+  if (rol === 'ORGANIZADOR') return '/panel/inventario';
+  return '/panel/dashboard'; // DUENO
+}
+
+// ─────────────────────────────────────────────────────────────
+// 1. Wrapper de Login: redirige si ya está autenticado
+// ─────────────────────────────────────────────────────────────
 function LoginRouteWrapper() {
   const { currentUser, currentNegocio } = useAuth();
 
@@ -54,24 +65,19 @@ function LoginRouteWrapper() {
       return <Navigate to="/admin/global/database" replace />;
     }
     if (!currentNegocio) {
-      return <Navigate to="/admin/seleccion-negocio" replace />;
+      return <Navigate to="/seleccion-negocio" replace />;
     }
-    if (currentUser.rol === 'ORGANIZADOR') {
-      return <Navigate to="/admin/inventario" replace />;
-    }
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to={getDefaultRoute(currentUser.rol)} replace />;
   }
   return <LoginPage />;
 }
 
-// 2. Componente de Layout compartido (Sidebar + Header + Outlet)
+// ─────────────────────────────────────────────────────────────
+// 2. Layout compartido (Sidebar + Header + Outlet)
+// ─────────────────────────────────────────────────────────────
 function AppLayout() {
   const navigate = useNavigate();
-  const { currentUser, currentNegocio, logout, selectNegocio, bypassAdminDB } = useAuth();
-
-  const handleSelectNegocioWrapper = (negocio) => {
-    selectNegocio(negocio);
-  };
+  const { currentUser, currentNegocio, logout, bypassAdminDB } = useAuth();
 
   const getNavItems = () => {
     const items = [];
@@ -118,22 +124,24 @@ function AppLayout() {
         borderSideColor: 'border-neonCyan' 
       });
     } else {
+      // Vistas exclusivas de DUENO
       if (currentNegocio && currentUser.rol === 'DUENO') {
         items.push({ 
           id: 'dashboard', 
           label: 'Dashboard', 
-          path: '/admin/dashboard', 
+          path: '/panel/dashboard', 
           icon: TrendingUp, 
           activeColor: 'text-neonGreen', 
           borderSideColor: 'border-neonGreen' 
         });
       }
       
+      // Vistas comunes (DUENO + ORGANIZADOR)
       if (currentNegocio) {
         items.push({ 
           id: 'inventario', 
           label: 'Inventario', 
-          path: '/admin/inventario', 
+          path: '/panel/inventario', 
           icon: Package, 
           activeColor: 'text-neonGreen', 
           borderSideColor: 'border-neonGreen' 
@@ -141,18 +149,19 @@ function AppLayout() {
         items.push({ 
           id: 'ventas', 
           label: 'Nueva Venta', 
-          path: '/admin/nueva-venta', 
+          path: '/panel/nueva-venta', 
           icon: ShoppingCart, 
           activeColor: 'text-neonGreen', 
           borderSideColor: 'border-neonGreen' 
         });
       }
       
+      // Vistas financieras exclusivas de DUENO
       if (currentNegocio && currentUser.rol === 'DUENO') {
         items.push({ 
           id: 'lotes', 
           label: 'Deudas', 
-          path: '/admin/deudas', 
+          path: '/panel/deudas', 
           icon: Coins, 
           activeColor: 'text-neonCyan', 
           borderSideColor: 'border-neonCyan' 
@@ -160,7 +169,7 @@ function AppLayout() {
         items.push({ 
           id: 'proveedores', 
           label: 'Proveedores', 
-          path: '/admin/proveedores', 
+          path: '/panel/proveedores', 
           icon: UserCheck, 
           activeColor: 'text-neonCyan', 
           borderSideColor: 'border-neonCyan' 
@@ -168,7 +177,7 @@ function AppLayout() {
         items.push({ 
           id: 'gastos', 
           label: 'Gastos', 
-          path: '/admin/gastos', 
+          path: '/panel/gastos', 
           icon: TrendingDown, 
           activeColor: 'text-red-500', 
           borderSideColor: 'border-red-500' 
@@ -211,7 +220,7 @@ function AppLayout() {
                 <button 
                   onClick={() => {
                     bypassAdminDB();
-                    navigate('/admin/seleccion-negocio');
+                    navigate('/seleccion-negocio');
                   }}
                   className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
                 >
@@ -225,7 +234,7 @@ function AppLayout() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-500">Sin seleccionar</span>
                 <button 
-                  onClick={() => navigate('/admin/seleccion-negocio')}
+                  onClick={() => navigate('/seleccion-negocio')}
                   className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
                 >
                   Elegir
@@ -282,7 +291,7 @@ function AppLayout() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-h-0 overflow-y-auto pb-24 md:pb-8 p-4 md:p-8">
         
-        {/* Mobile Header (visible en moviles) */}
+        {/* Mobile Header (visible en móviles) */}
         <header className="flex md:hidden flex-col bg-carbon-900 border-b border-carbon-800 p-4 -mx-4 -mt-4 mb-6 shadow-md gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -317,7 +326,7 @@ function AppLayout() {
                   <button 
                     onClick={() => {
                       bypassAdminDB();
-                      navigate('/admin/seleccion-negocio');
+                      navigate('/seleccion-negocio');
                     }}
                     className="text-[9px] text-neonCyan underline font-semibold ml-1"
                   >
@@ -328,7 +337,7 @@ function AppLayout() {
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-amber-500">Sin Seleccionar</span>
                   <button 
-                    onClick={() => navigate('/admin/seleccion-negocio')}
+                    onClick={() => navigate('/seleccion-negocio')}
                     className="text-[9px] text-neonCyan underline font-semibold ml-1"
                   >
                     Elegir
@@ -376,35 +385,29 @@ function AppLayout() {
   );
 }
 
-// 3. Componente de Rutas lógicas de la aplicación
+// ─────────────────────────────────────────────────────────────
+// 3. Árbol de Rutas de la Aplicación
+// ─────────────────────────────────────────────────────────────
 function AppRoutes() {
   return (
     <Routes>
       {/* 1. Ruta pública de Login */}
       <Route 
         path="/" 
-        element={
-          <LoginRouteWrapper />
-        } 
+        element={<LoginRouteWrapper />} 
       />
 
-      {/* 2. Pantalla de Selección de Negocio (Protegida) */}
+      {/* 2. Selección de Negocio (protegida, sin prefijo de rol) */}
       <Route 
-        element={
-          <ProtectedRoute 
-            isNegocioSelectionRoute={true} 
-          />
-        }
+        element={<ProtectedRoute isNegocioSelectionRoute={true} />}
       >
         <Route 
-          path="/admin/seleccion-negocio" 
-          element={
-            <NegocioSelectPage />
-          } 
+          path="/seleccion-negocio" 
+          element={<NegocioSelectPage />} 
         />
       </Route>
 
-      {/* 3. Consola de Base de Datos para el ADMIN (Protegida sin forzar negocio) */}
+      {/* 3. Rutas Globales: solo ADMIN — /admin/global/* */}
       <Route 
         element={
           <ProtectedRoute 
@@ -413,57 +416,42 @@ function AppRoutes() {
           />
         }
       >
-        <Route 
-          element={
-            <AppLayout />
-          }
-        >
-          <Route path="/admin/global/database" element={<DbConsolePage />} />
-          <Route path="/admin/global/sedes" element={<SedesPage />} />
-          <Route path="/admin/global/usuarios" element={<UsuariosPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/admin/global/database"  element={<DbConsolePage />} />
+          <Route path="/admin/global/sedes"     element={<SedesPage />} />
+          <Route path="/admin/global/usuarios"  element={<UsuariosPage />} />
           <Route path="/admin/global/inventario" element={<InventarioGlobalPage />} />
           <Route path="/admin/global/auditoria" element={<AuditoriaPage />} />
         </Route>
       </Route>
 
-      {/* 4. Rutas operativas del negocio (Protegidas y requieren selección de negocio) */}
-      <Route 
-        element={
-          <ProtectedRoute />
-        }
-      >
-        <Route 
-          element={
-            <AppLayout />
-          }
-        >
-          {/* Vistas restringidas a administradores y dueños */}
-          <Route 
-            element={
-              <ProtectedRoute 
-                allowedRoles={['ADMIN', 'DUENO']} 
-              />
-            }
-          >
-            <Route path="/admin/dashboard" element={<DashboardPage />} />
-            <Route path="/admin/deudas" element={<LotesDeudasPage />} />
-            <Route path="/admin/proveedores" element={<ProveedoresPage />} />
-            <Route path="/admin/gastos" element={<GastosPage />} />
+      {/* 4. Rutas del Panel de Negocio — /panel/* (DUENO + ORGANIZADOR) */}
+      <Route element={<ProtectedRoute allowedRoles={['DUENO', 'ORGANIZADOR']} />}>
+        <Route element={<AppLayout />}>
+
+          {/* Vistas exclusivas DUENO */}
+          <Route element={<ProtectedRoute allowedRoles={['DUENO']} />}>
+            <Route path="/panel/dashboard"   element={<DashboardPage />} />
+            <Route path="/panel/deudas"      element={<LotesDeudasPage />} />
+            <Route path="/panel/proveedores" element={<ProveedoresPage />} />
+            <Route path="/panel/gastos"      element={<GastosPage />} />
           </Route>
 
-          {/* Vistas accesibles por todos (ADMIN, DUENO, ORGANIZADOR) */}
-          <Route path="/admin/inventario" element={<InventarioPage />} />
-          <Route path="/admin/nueva-venta" element={<VentaCheckoutPage />} />
+          {/* Vistas accesibles por DUENO y ORGANIZADOR */}
+          <Route path="/panel/inventario"   element={<InventarioPage />} />
+          <Route path="/panel/nueva-venta"  element={<VentaCheckoutPage />} />
         </Route>
       </Route>
 
-      {/* 5. Comportamiento por defecto / Fallback */}
+      {/* 5. Fallback: redirigir al login */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
-// 4. Punto de entrada principal con el BrowserRouter
+// ─────────────────────────────────────────────────────────────
+// 4. Punto de entrada con BrowserRouter
+// ─────────────────────────────────────────────────────────────
 function App() {
   return (
     <BrowserRouter>

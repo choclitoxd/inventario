@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getDefaultRoute } from '../App';
 
 function ProtectedRoute({ 
   allowedRoles, 
@@ -9,35 +10,28 @@ function ProtectedRoute({
 }) {
   const { currentUser, currentNegocio } = useAuth();
 
-  // 1. Si no está autenticado, redirigir al login (/)
+  // 1. Sin autenticación → login
   if (!currentUser) {
     return <Navigate to="/" replace />;
   }
 
-  // 2. Si está autenticado pero su rol no está permitido en esta ruta
+  // 2. Rol no permitido en esta ruta → redirigir a su vista por defecto
   if (allowedRoles && !allowedRoles.includes(currentUser.rol)) {
-    // Redirigir según el rol del usuario a su vista por defecto
-    if (currentUser.rol === 'ORGANIZADOR') {
-      return <Navigate to="/admin/inventario" replace />;
-    }
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to={getDefaultRoute(currentUser.rol)} replace />;
   }
 
-  // 3. Si no ha seleccionado negocio
+  // 3. Sin negocio seleccionado (y no es la pantalla de selección ni rutas ADMIN sin negocio)
   const isBypassing = currentUser.rol === 'ADMIN' && isDbAdminRoute;
   if (!currentNegocio && !isBypassing && !isNegocioSelectionRoute) {
-    return <Navigate to="/admin/seleccion-negocio" replace />;
+    return <Navigate to="/seleccion-negocio" replace />;
   }
 
-  // 4. Si ya tiene negocio seleccionado y trata de ir a la selección de negocio (evitar loops)
+  // 4. Ya tiene negocio y quiere volver a la selección → redirigir a su dashboard
   if (currentNegocio && isNegocioSelectionRoute) {
-    if (currentUser.rol === 'ORGANIZADOR') {
-      return <Navigate to="/admin/inventario" replace />;
-    }
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to={getDefaultRoute(currentUser.rol)} replace />;
   }
 
-  // Si todo es correcto, renderizar las rutas hijas
+  // OK → renderizar rutas hijas
   return <Outlet />;
 }
 
