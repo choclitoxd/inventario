@@ -1,17 +1,20 @@
-import React from 'react';
-import { Coins, CheckCircle, AlertTriangle, UserCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Coins, CheckCircle, AlertTriangle, UserCheck, Plus } from 'lucide-react';
 import useLotesDeudas from '../hooks/useLotesDeudas';
 import DeudasTracker from '../components/features/lotes/DeudasTracker';
 import HistoricoLotesTable from '../components/features/lotes/HistoricoLotesTable';
+import RegisterDeudaModal from '../components/features/lotes/RegisterDeudaModal';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 function LotesDeudasPage() {
   const {
     deudas,
     lotes,
+    proveedores,
     loading,
     error,
     success,
+    setSuccess,
     showAbonoForm,
     setShowAbonoForm,
     abonoMonto,
@@ -22,8 +25,11 @@ function LotesDeudasPage() {
     formatCOP,
     userRole,
     handleEditarLote,
-    handleEliminarLote
+    handleEliminarLote,
+    loadData,
   } = useLotesDeudas();
+
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   const totalDeudaAcumulada = deudas.reduce((sum, d) => sum + (d.saldoPendiente || 0), 0);
   const totalAmortizado = deudas.reduce((sum, d) => sum + ((d.montoPrestado || 0) - (d.saldoPendiente || 0)), 0);
@@ -39,10 +45,15 @@ function LotesDeudasPage() {
     deuda
   }));
 
+  const handleSavedLote = async () => {
+    setSuccess('¡Lote / deuda registrado con éxito! Los datos se han actualizado.');
+    await loadData();
+  };
+
   return (
     <div className="space-y-6">
       
-      {/* Top Banner */}
+      {/* Top Banner con botón de acción */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-carbon-900 border border-carbon-800 p-4 rounded-2xl shadow-lg">
         <div>
           <h2 className="text-2xl font-sports font-bold text-white flex items-center gap-3">
@@ -50,6 +61,14 @@ function LotesDeudasPage() {
           </h2>
           <p className="text-xs text-carbon-500 font-medium">Monitoreo de capital financiado, amortizaciones y pasivos por proveedor.</p>
         </div>
+        <button
+          id="btn-registrar-deuda"
+          onClick={() => setIsRegisterModalOpen(true)}
+          className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-md shadow-emerald-900/20 shrink-0"
+        >
+          <Plus size={14} />
+          Registrar Lote / Deuda
+        </button>
       </div>
 
       {success && (
@@ -169,6 +188,14 @@ function LotesDeudasPage() {
           />
         </div>
       </div>
+
+      {/* Modal de Registro de Lote / Deuda */}
+      <RegisterDeudaModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        proveedores={proveedores}
+        onSaved={handleSavedLote}
+      />
 
     </div>
   );
