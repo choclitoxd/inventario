@@ -2,6 +2,7 @@ package com.panini.inventario.lote.controller;
 
 import com.panini.inventario.lote.model.Inversionista;
 import com.panini.inventario.lote.repository.InversionistaRepository;
+import com.panini.inventario.lote.service.ProveedorService;
 import com.panini.inventario.negocio.model.Negocio;
 import com.panini.inventario.negocio.repository.NegocioRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +23,11 @@ public class InversionistaController {
 
     private final InversionistaRepository inversionistaRepository;
     private final NegocioRepository negocioRepository;
+    private final ProveedorService proveedorService;
 
     @GetMapping
-    public List<Inversionista> listar(@RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
-        if (negocioId == null) {
-            return List.of();
-        }
-        return inversionistaRepository.findByNegocioId(negocioId);
+    public List<Inversionista> listar() {
+        return proveedorService.listarProveedores();
     }
 
     @PostMapping

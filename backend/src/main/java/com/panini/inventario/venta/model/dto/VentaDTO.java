@@ -8,5 +8,6 @@ public record VentaDTO(
     String clienteNombre,
     String clienteTelefono,
     MetodoPago metodoPago,
+    String nroComprobante,
     List<VentaDetalleDTO> detalles
 ) {}

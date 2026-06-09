@@ -37,6 +37,7 @@ import com.panini.inventario.gasto.repository.GastoHormigaRepository;
 import com.panini.inventario.auditoria.model.Auditoria;
 import com.panini.inventario.auditoria.repository.AuditoriaRepository;
 
+import org.springframework.context.annotation.Profile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -48,6 +49,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
+@Profile("!prod")
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 

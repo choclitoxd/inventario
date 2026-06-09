@@ -83,7 +83,7 @@ public class VentaServiceTest {
                 1, 1, 0, 1, 0, 
                 null, new BigDecimal("250000"), null, null
         );
-        VentaDTO dto = new VentaDTO(1, null, null, Venta.MetodoPago.EFECTIVO, List.of(detalleDTO));
+        VentaDTO dto = new VentaDTO(1, null, null, Venta.MetodoPago.EFECTIVO, null, List.of(detalleDTO));
 
         when(ventaRepository.save(any(Venta.class))).thenAnswer(i -> i.getArguments()[0]);
         when(ventaDetalleRepository.save(any(VentaDetalle.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -102,5 +102,17 @@ public class VentaServiceTest {
         // Saldo Final: 100.000 - 25.000 = 75.000
         assertEquals(0, new BigDecimal("75000").compareTo(lote.getSaldoPendiente()));
         verify(amortizacionDeudaRepository).save(any(AmortizacionDeuda.class));
+    }
+
+    @Test
+    void registrarVenta_TransferenciaSinComprobante_DebeFallar() {
+        // Setup Payload de Venta sin comprobante
+        VentaDTO dto = new VentaDTO(1, null, null, Venta.MetodoPago.TRANSFERENCIA, null, List.of());
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            ventaService.registrarVenta(dto, 1);
+        });
+        assertEquals("Se requiere el número de comprobante para pagos por transferencia", exception.getMessage());
     }
 }

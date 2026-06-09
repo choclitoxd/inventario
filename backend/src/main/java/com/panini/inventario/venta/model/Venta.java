@@ -31,6 +31,9 @@ public class Venta {
     @Column(name = "metodo_pago", nullable = false)
     private MetodoPago metodoPago;
 
+    @Column(name = "nro_comprobante", length = 100)
+    private String nroComprobante;
+
     @Column(name = "total_venta", precision = 15, scale = 2, nullable = false)
     private BigDecimal totalVenta;
 

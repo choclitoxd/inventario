@@ -39,6 +39,11 @@ public class VentaService {
 
     @Transactional
     public Venta registrarVenta(VentaDTO dto, Integer negocioId) {
+        if (dto.metodoPago() == Venta.MetodoPago.TRANSFERENCIA && 
+            (dto.nroComprobante() == null || dto.nroComprobante().isBlank())) {
+            throw new IllegalArgumentException("Se requiere el número de comprobante para pagos por transferencia");
+        }
+
         Cliente cliente;
         if (dto.clienteId() != null) {
             cliente = clienteRepository.findById(dto.clienteId())
@@ -67,6 +72,7 @@ public class VentaService {
         Venta venta = Venta.builder()
                 .cliente(cliente)
                 .metodoPago(dto.metodoPago())
+                .nroComprobante(dto.nroComprobante())
                 .totalVenta(BigDecimal.ZERO)
                 .utilidadBrutaTotal(BigDecimal.ZERO)
                 .negocio(negocio)

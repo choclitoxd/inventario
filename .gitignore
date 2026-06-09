@@ -30,3 +30,22 @@ Thumbs.db
 
 # Log files
 *.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SQL files & DB backups (ignores all .sql files except db_schema.sql)
+*.sql
+!db/db_schema.sql
+!db_schema.sql
+
+# Packages, debug & caches
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
