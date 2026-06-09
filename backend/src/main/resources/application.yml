@@ -1,17 +1,16 @@
+# Configuración base compartida — NO contiene credenciales de ningún entorno
 spring:
   application:
     name: panini-inventario
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3306/panini_db}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:rootpassword}
-    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+
 server:
   port: 8080

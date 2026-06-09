@@ -31,6 +31,9 @@ Thumbs.db
 # Log files
 *.log
 
+# Spring Boot — perfiles locales con credenciales (NO subir a git)
+backend/src/main/resources/application-dev.yml
+
 # Environment files
 .env
 .env.local
