@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
 
 function useSedesManagement() {
   const [sedes, setSedes] = useState([]);
@@ -25,8 +25,8 @@ function useSedesManagement() {
     setError(null);
     try {
       const [negocios, users] = await Promise.all([
-        api.listarNegocios(),
-        api.listarUsuarios()
+        authService.listarNegocios(),
+        authService.listarUsuarios()
       ]);
       setSedes(negocios || []);
       setUsuarios(users || []);
@@ -54,7 +54,7 @@ function useSedesManagement() {
 
     setLoading(true);
     try {
-      await api.crearNegocio({
+      await authService.crearNegocio({
         nombre: nombreSede.trim(),
         duenoIds: selectedJefesIds
       });
@@ -80,7 +80,7 @@ function useSedesManagement() {
 
     setLoading(true);
     try {
-      await api.actualizarNegocio(id, {
+      await authService.actualizarNegocio(id, {
         nombre: nombre.trim(),
         duenoIds: jefesIds
       });
@@ -101,7 +101,7 @@ function useSedesManagement() {
     setSuccess(null);
     setLoading(true);
     try {
-      await api.eliminarNegocio(id);
+      await authService.eliminarNegocio(id);
       setSuccess('Sede eliminada exitosamente.');
       await loadData();
     } catch (err) {

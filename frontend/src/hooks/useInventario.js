@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { api } from '../services/api';
+import { inventarioService } from '../services/inventarioService';
+import { authService } from '../services/authService';
+import { proveedorService } from '../services/proveedorService';
 import { formatCurrency } from '../utils/format';
 
 function useInventario() {
@@ -10,11 +12,16 @@ function useInventario() {
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState('');
 
+  // UI States evacuated from InventarioPage
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [showVincularModal, setShowVincularModal] = useState(false);
+  const [editingInventario, setEditingInventario] = useState(null);
+
   const fetchProductosAndLotes = async () => {
     try {
       const [prods, lts] = await Promise.all([
-        api.listarProductos(),
-        api.listarLotes()
+        authService.listarProductos(),
+        proveedorService.listarLotes()
       ]);
       setProductos(prods || []);
       setLotes(lts || []);
@@ -28,7 +35,7 @@ function useInventario() {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.listarInventario();
+      const data = await inventarioService.listarInventario();
       setInventarios(data || []);
     } catch (err) {
       console.error(err);
@@ -46,7 +53,7 @@ function useInventario() {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.desglosarInventario(productoId, loteId, accion);
+      await inventarioService.desglosarInventario(productoId, loteId, accion);
       setSuccessMsg(`¡Desglose de ${accion.toLowerCase()} ejecutado con éxito para este lote!`);
       await fetchInventario();
     } catch (err) {
@@ -58,7 +65,7 @@ function useInventario() {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.vincularProductoInventario(dto);
+      await inventarioService.vincularProductoInventario(dto);
       setSuccessMsg('¡Producto vinculado con éxito a la sede!');
       await fetchInventario();
     } catch (err) {
@@ -71,7 +78,7 @@ function useInventario() {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.actualizarInventarioSede(id, dto);
+      await inventarioService.actualizarInventarioSede(id, dto);
       setSuccessMsg('¡Inventario y costos actualizados con éxito!');
       await fetchInventario();
     } catch (err) {
@@ -84,7 +91,7 @@ function useInventario() {
     try {
       setSuccessMsg('');
       setError(null);
-      await api.eliminarInventarioSede(id);
+      await inventarioService.eliminarInventarioSede(id);
       setSuccessMsg('¡Producto desvinculado de la sede con éxito!');
       await fetchInventario();
     } catch (err) {
@@ -132,6 +139,11 @@ function useInventario() {
     }, 0);
   }, [inventarios]);
 
+  // activeProduct computed from local selection
+  const activeProduct = useMemo(() => {
+    return productosAgrupados.find((p) => p.producto.id === selectedProductId) || null;
+  }, [productosAgrupados, selectedProductId]);
+
   return {
     inventarios,
     productosAgrupados,
@@ -149,7 +161,16 @@ function useInventario() {
     fetchProductosAndLotes,
     formatCOP,
     fetchInventario,
-    inversionTotalVal
+    inversionTotalVal,
+    
+    // UI States and values
+    selectedProductId,
+    setSelectedProductId,
+    showVincularModal,
+    setShowVincularModal,
+    editingInventario,
+    setEditingInventario,
+    activeProduct
   };
 }
 

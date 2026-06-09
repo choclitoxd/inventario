@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
+import { inventarioService } from '../services/inventarioService';
 
 function useInventarioGlobal() {
   const [inventarioGlobal, setInventarioGlobal] = useState([]);
@@ -15,9 +16,9 @@ function useInventarioGlobal() {
     setError(null);
     try {
       const [invData, prodData, sedesData] = await Promise.all([
-        api.obtenerInventarioGlobal(),
-        api.listarProductos(),
-        api.listarNegocios().catch(() => [])
+        inventarioService.obtenerInventarioGlobal(),
+        authService.listarProductos(),
+        authService.listarNegocios().catch(() => [])
       ]);
       setInventarioGlobal(invData || []);
       setProductos(prodData || []);
@@ -39,7 +40,7 @@ function useInventarioGlobal() {
     setError(null);
     setSuccessMsg('');
     try {
-      await api.crearProducto(productoDto);
+      await authService.crearProducto(productoDto);
       setSuccessMsg(`¡Producto "${productoDto.nombre}" creado exitosamente en el catálogo maestro!`);
       await fetchGlobalData();
     } catch (err) {
@@ -55,7 +56,7 @@ function useInventarioGlobal() {
     setError(null);
     setSuccessMsg('');
     try {
-      await api.actualizarProductoAdmin(id, productoDetails);
+      await authService.actualizarProductoAdmin(id, productoDetails);
       setSuccessMsg(`¡Producto "${productoDetails.nombre}" actualizado con éxito!`);
       await fetchGlobalData();
     } catch (err) {
@@ -71,7 +72,7 @@ function useInventarioGlobal() {
     setError(null);
     setSuccessMsg('');
     try {
-      await api.eliminarProductoAdmin(id);
+      await authService.eliminarProductoAdmin(id);
       setSuccessMsg('¡Producto eliminado exitosamente del catálogo maestro!');
       await fetchGlobalData();
     } catch (err) {
@@ -87,7 +88,7 @@ function useInventarioGlobal() {
     setError(null);
     setSuccessMsg('');
     try {
-      await api.abrirCaja(productoId, {
+      await inventarioService.abrirCaja(productoId, {
         headers: { 'X-Negocio-Id': negocioId }
       });
       setSuccessMsg('¡Caja abierta exitosamente!');

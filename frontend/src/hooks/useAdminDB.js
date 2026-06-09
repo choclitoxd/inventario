@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
+import { ventasService } from '../services/ventasService';
+import { proveedorService } from '../services/proveedorService';
+import { gastosService } from '../services/gastosService';
 
 function useAdminDB() {
   const [stats, setStats] = useState({
@@ -56,13 +59,13 @@ function useAdminDB() {
     setStatsLoading(true);
     try {
       const [clientes, productos, ventas, lotes, gastos, negocios, usuarios] = await Promise.all([
-        api.listarClientes().catch(() => []),
-        api.listarProductos().catch(() => []),
-        api.listarVentas().catch(() => []),
-        api.listarLotes().catch(() => []),
-        api.listarGastos().catch(() => []),
-        api.listarNegocios().catch(() => []),
-        api.listarUsuarios().catch(() => [])
+        ventasService.listarClientes().catch(() => []),
+        authService.listarProductos().catch(() => []),
+        ventasService.listarVentas().catch(() => []),
+        proveedorService.listarLotes().catch(() => []),
+        gastosService.listarGastos().catch(() => []),
+        authService.listarNegocios().catch(() => []),
+        authService.listarUsuarios().catch(() => [])
       ]);
 
       setStats({
@@ -86,7 +89,7 @@ function useAdminDB() {
     setDbHealthLoading(true);
     setDbHealthError(null);
     try {
-      const data = await api.obtenerDbSalud();
+      const data = await authService.obtenerDbSalud();
       setDbHealth(data);
     } catch (err) {
       console.error(err);
@@ -100,7 +103,7 @@ function useAdminDB() {
     setAuditLoading(true);
     setAuditError(null);
     try {
-      const logs = await api.listarAuditoria();
+      const logs = await authService.listarAuditoria();
       setAuditLogs(logs || []);
     } catch (err) {
       console.error(err);
@@ -110,7 +113,6 @@ function useAdminDB() {
     }
   };
 
-
   const handleExecuteSql = async (queryToExecute) => {
     const query = queryToExecute || sqlQuery;
     if (!query.trim()) return;
@@ -119,7 +121,7 @@ function useAdminDB() {
     setQueryError(null);
     setQueryResult(null);
     try {
-      const res = await api.ejecutarSql(query.trim());
+      const res = await authService.ejecutarSql(query.trim());
       setQueryResult(res);
       // Si fue una consulta de actualización o alteró algo, refrescar
       if (res.updateCount > 0 || !query.trim().toLowerCase().startsWith('select')) {
@@ -168,7 +170,7 @@ function useAdminDB() {
     formData.append('file', file);
 
     try {
-      await api.restaurarBackup(formData);
+      await authService.restaurarBackup(formData);
       setRestoreSuccess(true);
       setRestoreFile(null);
       
@@ -190,7 +192,7 @@ function useAdminDB() {
     setNegocioError(null);
     setNegocioSuccess(false);
     try {
-      await api.crearNegocio({ nombre: name.trim() });
+      await authService.crearNegocio({ nombre: name.trim() });
       setNegocioSuccess(true);
       setNegocioNombre('');
       fetchStatsAndLists();
@@ -210,7 +212,7 @@ function useAdminDB() {
     setUserError(null);
     setUserSuccess(false);
     try {
-      await api.crearUsuario({
+      await authService.crearUsuario({
         username: form.username.trim(),
         password: form.password,
         nombre: form.nombre.trim(),

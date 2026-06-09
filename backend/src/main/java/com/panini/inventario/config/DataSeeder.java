@@ -15,6 +15,10 @@ import com.panini.inventario.lote.model.LoteInversionista;
 import com.panini.inventario.lote.model.LoteInversionista.Financiador;
 import com.panini.inventario.lote.model.LoteInversionista.Estado;
 import com.panini.inventario.lote.repository.LoteInversionistaRepository;
+import com.panini.inventario.lote.model.Inversionista;
+import com.panini.inventario.lote.repository.InversionistaRepository;
+import com.panini.inventario.lote.model.ProveedorTarifa;
+import com.panini.inventario.lote.repository.ProveedorTarifaRepository;
 import com.panini.inventario.stock.model.Inventario;
 import com.panini.inventario.stock.repository.InventarioRepository;
 import com.panini.inventario.stock.model.RegistroCajaAbierta;
@@ -53,6 +57,8 @@ public class DataSeeder implements CommandLineRunner {
         private final ProductoRepository productoRepository;
         private final ComboComposicionRepository comboComposicionRepository;
         private final LoteInversionistaRepository loteInversionistaRepository;
+        private final InversionistaRepository inversionistaRepository;
+        private final ProveedorTarifaRepository proveedorTarifaRepository;
         private final InventarioRepository inventarioRepository;
         private final VentaRepository ventaRepository;
         private final VentaDetalleRepository ventaDetalleRepository;
@@ -100,14 +106,38 @@ public class DataSeeder implements CommandLineRunner {
                                 .duenos("Donato, Giank")
                                 .build();
 
-                Negocio medellin = Negocio.builder()
-                                .nombre("Panini Medellín")
+                Negocio armenia = Negocio.builder()
+                                .nombre("Panini Armenia")
                                 .duenos("Donato")
                                 .build();
 
                 bogota = negocioRepository.save(bogota);
-                medellin = negocioRepository.save(medellin);
-                System.out.println(">>> Sedes sembradas: Panini Bogotá, Panini Medellín");
+                armenia = negocioRepository.save(armenia);
+                System.out.println(">>> Sedes sembradas: Panini Bogotá, Panini Armenia");
+
+                // 2.5 Sembrar Proveedores (Inversionistas)
+                Inversionista provCentral = Inversionista.builder()
+                                .nombre("Proveedor Panini Central")
+                                .telefono("3005550001")
+                                .negocio(bogota)
+                                .build();
+
+                Inversionista provOro = Inversionista.builder()
+                                .nombre("Distribuciones Oro")
+                                .telefono("3005550002")
+                                .negocio(bogota)
+                                .build();
+
+                Inversionista provExpress = Inversionista.builder()
+                                .nombre("Importaciones Express")
+                                .telefono("3005550003")
+                                .negocio(armenia)
+                                .build();
+
+                provCentral = inversionistaRepository.save(provCentral);
+                provOro = inversionistaRepository.save(provOro);
+                provExpress = inversionistaRepository.save(provExpress);
+                System.out.println(">>> Proveedores sembrados: Central, Oro, Express");
 
                 // 3. Sembrar Usuarios
                 Usuario donato = Usuario.builder()
@@ -154,19 +184,31 @@ public class DataSeeder implements CommandLineRunner {
                                 .negocio(bogota)
                                 .build();
 
-                Cliente clienteMed1 = Cliente.builder()
-                                .nombre("Coleccionista Premium Medellín")
+                Cliente clienteArm1 = Cliente.builder()
+                                .nombre("Armenia Distribuciones Ltda")
                                 .telefono("3154445555")
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
-                Cliente clienteMed2 = Cliente.builder()
-                                .nombre("Tienda Medellín Centro")
+                Cliente clienteArm2 = Cliente.builder()
+                                .nombre("Tienda Armenia Centro")
                                 .telefono("3206667777")
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
-                clienteRepository.saveAll(List.of(clienteBog1, clienteBog2, clienteMed1, clienteMed2));
+                Cliente clienteArm3 = Cliente.builder()
+                                .nombre("Carlos Alberto Gómez")
+                                .telefono("3112223333")
+                                .negocio(armenia)
+                                .build();
+
+                Cliente clienteArm4 = Cliente.builder()
+                                .nombre("María Alejandra Restrepo")
+                                .telefono("3124445555")
+                                .negocio(armenia)
+                                .build();
+
+                clienteRepository.saveAll(List.of(clienteBog1, clienteBog2, clienteArm1, clienteArm2, clienteArm3, clienteArm4));
                 System.out.println(">>> Clientes sembrados para ambas sedes");
 
                 // 5. Sembrar Productos
@@ -225,13 +267,53 @@ public class DataSeeder implements CommandLineRunner {
                 comboComposicionRepository.saveAll(List.of(comp1, comp2));
                 System.out.println(">>> Productos y Composición de Combo sembrados");
 
-                // 6. Sembrar Lotes de Inversionistas
+                // 5.5 Sembrar Tarifas de Proveedores
+                ProveedorTarifa tarifaAlbumCentral = ProveedorTarifa.builder()
+                                .proveedor(provCentral)
+                                .producto(album)
+                                .costoPactado(new BigDecimal("7000.00"))
+                                .negocio(bogota)
+                                .build();
+
+                ProveedorTarifa tarifaCajaCentral = ProveedorTarifa.builder()
+                                .proveedor(provCentral)
+                                .producto(cajaSobres)
+                                .costoPactado(new BigDecimal("260000.00"))
+                                .negocio(bogota)
+                                .build();
+
+                ProveedorTarifa tarifaSobreCentral = ProveedorTarifa.builder()
+                                .proveedor(provCentral)
+                                .producto(sobreSuelto)
+                                .costoPactado(new BigDecimal("2500.00"))
+                                .negocio(bogota)
+                                .build();
+
+                ProveedorTarifa tarifaAlbumOro = ProveedorTarifa.builder()
+                                .proveedor(provOro)
+                                .producto(album)
+                                .costoPactado(new BigDecimal("7200.00"))
+                                .negocio(bogota)
+                                .build();
+
+                ProveedorTarifa tarifaCajaExpress = ProveedorTarifa.builder()
+                                .proveedor(provExpress)
+                                .producto(cajaSobres)
+                                .costoPactado(new BigDecimal("265000.00"))
+                                .negocio(armenia)
+                                .build();
+
+                proveedorTarifaRepository.saveAll(List.of(tarifaAlbumCentral, tarifaCajaCentral, tarifaSobreCentral, tarifaAlbumOro, tarifaCajaExpress));
+                System.out.println(">>> Tarifas de Proveedores sembradas");
+
+                // 6. Sembrar Lotes de Inversionistas (Financiamientos)
                 // Bogotá Lots
                 LoteInversionista loteBogA = LoteInversionista.builder()
                                 .nombreLote("Lote Inversión A Bogotá")
                                 .financiador(Financiador.DUENO_A)
+                                .inversionista(provCentral)
                                 .montoPrestado(new BigDecimal("10000000"))
-                                .saldoPendiente(BigDecimal.ZERO)
+                                .saldoPendiente(new BigDecimal("4000000"))
                                 .porcentajeGananciaAmortizacion(BigDecimal.ZERO)
                                 .estado(Estado.ACTIVO)
                                 .negocio(bogota)
@@ -240,51 +322,55 @@ public class DataSeeder implements CommandLineRunner {
                 LoteInversionista loteBogB = LoteInversionista.builder()
                                 .nombreLote("Lote Inversión B Bogotá")
                                 .financiador(Financiador.DUENO_B)
+                                .inversionista(provOro)
                                 .montoPrestado(new BigDecimal("8000000"))
                                 .saldoPendiente(BigDecimal.ZERO)
                                 .porcentajeGananciaAmortizacion(BigDecimal.ZERO)
-                                .estado(Estado.ACTIVO)
+                                .estado(Estado.LIQUIDADO)
                                 .negocio(bogota)
                                 .build();
 
                 LoteInversionista loteBogExt = LoteInversionista.builder()
                                 .nombreLote("Lote Externo Felipe Restrepo")
                                 .financiador(Financiador.INVERSIONISTA_EXTERNO)
+                                .inversionista(provCentral)
                                 .nombreInversionista("Felipe Restrepo")
                                 .montoPrestado(new BigDecimal("5000000"))
-                                .saldoPendiente(new BigDecimal("3500000"))
+                                .saldoPendiente(new BigDecimal("3920000"))
                                 .porcentajeGananciaAmortizacion(new BigDecimal("50.00"))
                                 .estado(Estado.ACTIVO)
                                 .negocio(bogota)
                                 .build();
 
-                // Medellín Lots
-                LoteInversionista loteMedA = LoteInversionista.builder()
-                                .nombreLote("Lote Dueño A Medellín")
+                // Armenia Lots
+                LoteInversionista loteArmA = LoteInversionista.builder()
+                                .nombreLote("Lote Dueño A Armenia")
                                 .financiador(Financiador.DUENO_A)
+                                .inversionista(provExpress)
                                 .montoPrestado(new BigDecimal("6000000"))
-                                .saldoPendiente(BigDecimal.ZERO)
+                                .saldoPendiente(new BigDecimal("6000000"))
                                 .porcentajeGananciaAmortizacion(BigDecimal.ZERO)
                                 .estado(Estado.ACTIVO)
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
-                LoteInversionista loteMedExt = LoteInversionista.builder()
-                                .nombreLote("Lote Externo Medellín")
+                LoteInversionista loteArmExt = LoteInversionista.builder()
+                                .nombreLote("Lote Externo Armenia")
                                 .financiador(Financiador.INVERSIONISTA_EXTERNO)
+                                .inversionista(provExpress)
                                 .nombreInversionista("Andrés Gómez")
                                 .montoPrestado(new BigDecimal("8000000"))
-                                .saldoPendiente(new BigDecimal("8000000"))
+                                .saldoPendiente(new BigDecimal("7465200"))
                                 .porcentajeGananciaAmortizacion(new BigDecimal("40.00"))
                                 .estado(Estado.ACTIVO)
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
                 loteBogA = loteInversionistaRepository.save(loteBogA);
                 loteBogB = loteInversionistaRepository.save(loteBogB);
                 loteBogExt = loteInversionistaRepository.save(loteBogExt);
-                loteMedA = loteInversionistaRepository.save(loteMedA);
-                loteMedExt = loteInversionistaRepository.save(loteMedExt);
+                loteArmA = loteInversionistaRepository.save(loteArmA);
+                loteArmExt = loteInversionistaRepository.save(loteArmExt);
                 System.out.println(">>> Lotes de capital/inversionistas sembrados");
 
                 // 7. Sembrar Inventario (Stock de productos vinculados a Lotes)
@@ -373,10 +459,10 @@ public class DataSeeder implements CommandLineRunner {
                                 .costoCompraUnidad(new BigDecimal("2500"))
                                 .build();
 
-                // Medellín Stock
-                Inventario stockMedA_album = Inventario.builder()
+                // Armenia Stock
+                Inventario stockArmA_album = Inventario.builder()
                                 .producto(album)
-                                .loteInversionista(loteMedA)
+                                .loteInversionista(loteArmA)
                                 .cantInicialPacas(4)
                                 .cantInicialCajas(0)
                                 .cantInicialUnidades(20)
@@ -388,9 +474,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .costoCompraUnidad(new BigDecimal("7000"))
                                 .build();
 
-                Inventario stockMedA_caja = Inventario.builder()
+                Inventario stockArmA_caja = Inventario.builder()
                                 .producto(cajaSobres)
-                                .loteInversionista(loteMedA)
+                                .loteInversionista(loteArmA)
                                 .cantInicialPacas(2)
                                 .cantInicialCajas(3)
                                 .cantInicialUnidades(40)
@@ -402,9 +488,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .costoCompraUnidad(new BigDecimal("2500"))
                                 .build();
 
-                Inventario stockMedExt_album = Inventario.builder()
+                Inventario stockArmExt_album = Inventario.builder()
                                 .producto(album)
-                                .loteInversionista(loteMedExt)
+                                .loteInversionista(loteArmExt)
                                 .cantInicialPacas(2)
                                 .cantInicialCajas(0)
                                 .cantInicialUnidades(8)
@@ -416,9 +502,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .costoCompraUnidad(new BigDecimal("7000"))
                                 .build();
 
-                Inventario stockMedExt_caja = Inventario.builder()
+                Inventario stockArmExt_caja = Inventario.builder()
                                 .producto(cajaSobres)
-                                .loteInversionista(loteMedExt)
+                                .loteInversionista(loteArmExt)
                                 .cantInicialPacas(1)
                                 .cantInicialCajas(5)
                                 .cantInicialUnidades(15)
@@ -436,10 +522,10 @@ public class DataSeeder implements CommandLineRunner {
                 stockBogB_caja = inventarioRepository.save(stockBogB_caja);
                 stockBogExt_album = inventarioRepository.save(stockBogExt_album);
                 stockBogExt_caja = inventarioRepository.save(stockBogExt_caja);
-                stockMedA_album = inventarioRepository.save(stockMedA_album);
-                stockMedA_caja = inventarioRepository.save(stockMedA_caja);
-                stockMedExt_album = inventarioRepository.save(stockMedExt_album);
-                stockMedExt_caja = inventarioRepository.save(stockMedExt_caja);
+                stockArmA_album = inventarioRepository.save(stockArmA_album);
+                stockArmA_caja = inventarioRepository.save(stockArmA_caja);
+                stockArmExt_album = inventarioRepository.save(stockArmExt_album);
+                stockArmExt_caja = inventarioRepository.save(stockArmExt_caja);
                 System.out.println(">>> Niveles de inventario sembrados para cada lote");
 
                 // 8. Sembrar Ventas Históricas y Detalles (Últimos 30 días)
@@ -576,20 +662,20 @@ public class DataSeeder implements CommandLineRunner {
                                 .build();
                 ventaDetalleRepository.save(det3Hijo2);
 
-                // Venta 4: Medellín (Hace 3 días) - 1 Paca y 3 Álbumes de Lote Externo Medellín (Amortización 40%)
+                // Venta 4: Armenia (Hace 3 días) - 1 Paca y 3 Álbumes de Lote Externo Armenia (Amortización 40%)
                 Venta venta4 = Venta.builder()
-                                .cliente(clienteMed1)
+                                .cliente(clienteArm1)
                                 .fechaVenta(LocalDateTime.now().minusDays(3))
                                 .metodoPago(MetodoPago.TRANSFERENCIA)
                                 .totalVenta(new BigDecimal("290000"))
                                 .utilidadBrutaTotal(new BigDecimal("87000")) // $290,000 - $203,000
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
                 venta4 = ventaRepository.save(venta4);
 
                 VentaDetalle det4 = VentaDetalle.builder()
                                 .venta(venta4)
-                                .inventario(stockMedExt_album)
+                                .inventario(stockArmExt_album)
                                 .producto(album)
                                 .cantidadPacas(1)
                                 .cantidadCajas(0)
@@ -604,9 +690,9 @@ public class DataSeeder implements CommandLineRunner {
                                 .build();
                 det4 = ventaDetalleRepository.save(det4);
 
-                // Registrar Amortización Automática Medellín
+                // Registrar Amortización Automática Armenia
                 AmortizacionDeuda amortAuto2 = AmortizacionDeuda.builder()
-                                .loteInversionista(loteMedExt)
+                                .loteInversionista(loteArmExt)
                                 .ventaDetalle(det4)
                                 .montoAmortizado(new BigDecimal("34800"))
                                 .fechaAmortizacion(LocalDateTime.now().minusDays(3))
@@ -615,20 +701,20 @@ public class DataSeeder implements CommandLineRunner {
                                 .build();
                 amortizacionDeudaRepository.save(amortAuto2);
 
-                // Venta 5: Medellín (Ayer) - 1 Caja de sobres de Lote A Medellín
+                // Venta 5: Armenia (Ayer) - 1 Caja de sobres de Lote A Armenia
                 Venta venta5 = Venta.builder()
-                                .cliente(clienteMed2)
+                                .cliente(clienteArm2)
                                 .fechaVenta(LocalDateTime.now().minusDays(1))
                                 .metodoPago(MetodoPago.EFECTIVO)
                                 .totalVenta(new BigDecimal("350000"))
                                 .utilidadBrutaTotal(new BigDecimal("90000")) // $350,000 - $260,000
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
                 venta5 = ventaRepository.save(venta5);
 
                 VentaDetalle det5 = VentaDetalle.builder()
                                 .venta(venta5)
-                                .inventario(stockMedA_caja)
+                                .inventario(stockArmA_caja)
                                 .producto(cajaSobres)
                                 .cantidadPacas(0)
                                 .cantidadCajas(1)
@@ -655,14 +741,31 @@ public class DataSeeder implements CommandLineRunner {
                                 .build();
 
                 AmortizacionDeuda amortManual2 = AmortizacionDeuda.builder()
-                                .loteInversionista(loteMedExt)
+                                .loteInversionista(loteArmExt)
                                 .montoAmortizado(new BigDecimal("500000"))
                                 .fechaAmortizacion(LocalDateTime.now().minusDays(2))
                                 .tipo(TipoAmortizacion.PAGO_MANUAL)
                                 .notas("Abono parcial manual por transferencia bancaria")
                                 .build();
 
-                amortizacionDeudaRepository.saveAll(List.of(amortManual1, amortManual2));
+                // Amortizaciones manuales adicionales para deudas consistentes
+                AmortizacionDeuda amortManualBogA = AmortizacionDeuda.builder()
+                                .loteInversionista(loteBogA)
+                                .montoAmortizado(new BigDecimal("6000000"))
+                                .fechaAmortizacion(LocalDateTime.now().minusDays(14))
+                                .tipo(TipoAmortizacion.PAGO_MANUAL)
+                                .notas("Abono extraordinario inicial")
+                                .build();
+
+                AmortizacionDeuda amortManualBogB = AmortizacionDeuda.builder()
+                                .loteInversionista(loteBogB)
+                                .montoAmortizado(new BigDecimal("8000000"))
+                                .fechaAmortizacion(LocalDateTime.now().minusDays(10))
+                                .tipo(TipoAmortizacion.PAGO_MANUAL)
+                                .notas("Abono de cancelación total de deuda por liquidación de lote")
+                                .build();
+
+                amortizacionDeudaRepository.saveAll(List.of(amortManual1, amortManual2, amortManualBogA, amortManualBogB));
                 System.out.println(">>> Amortizaciones manuales de deuda sembradas");
 
                 // 10. Sembrar Gastos Hormiga
@@ -683,23 +786,23 @@ public class DataSeeder implements CommandLineRunner {
                                 .negocio(bogota)
                                 .build();
 
-                GastoHormiga gastoMed1 = GastoHormiga.builder()
+                GastoHormiga gastoArm1 = GastoHormiga.builder()
                                 .descripcion("Moto-domicilio para entrega de combos especiales")
                                 .monto(new BigDecimal("25000"))
                                 .fechaGasto(LocalDateTime.now().minusDays(4))
                                 .categoria(CategoriaGasto.TRANSPORTE)
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
-                GastoHormiga gastoMed2 = GastoHormiga.builder()
+                GastoHormiga gastoArm2 = GastoHormiga.builder()
                                 .descripcion("Compra de cintas de embalaje y cartón")
                                 .monto(new BigDecimal("15000"))
                                 .fechaGasto(LocalDateTime.now().minusDays(2))
                                 .categoria(CategoriaGasto.OTRO)
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
-                gastoHormigaRepository.saveAll(List.of(gastoBog1, gastoBog2, gastoMed1, gastoMed2));
+                gastoHormigaRepository.saveAll(List.of(gastoBog1, gastoBog2, gastoArm1, gastoArm2));
                 System.out.println(">>> Gastos hormiga sembrados para ambas sedes");
 
                 // 11. Sembrar Registro Cajas Abiertas (Apertura/Desglose de cajas)
@@ -740,9 +843,9 @@ public class DataSeeder implements CommandLineRunner {
                 Auditoria log4 = Auditoria.builder()
                                 .usuario("chefcito")
                                 .accion("REGISTRO_GASTO")
-                                .detalle("Se registró un gasto por concepto de transporte por un monto de $25,000 en Panini Medellín")
+                                .detalle("Se registró un gasto por concepto de transporte por un monto de $25,000 en Panini Armenia")
                                 .fecha(LocalDateTime.now().minusDays(4))
-                                .negocio(medellin)
+                                .negocio(armenia)
                                 .build();
 
                 auditoriaRepository.saveAll(List.of(log1, log2, log3, log4));

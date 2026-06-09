@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   BrowserRouter, 
   Routes, 
@@ -20,7 +20,8 @@ import {
   Building2,
   Users,
   Activity,
-  Boxes
+  Boxes,
+  UserCheck
 } from 'lucide-react';
 
 // Import views
@@ -28,6 +29,7 @@ import DashboardPage from './pages/DashboardPage';
 import InventarioPage from './pages/InventarioPage';
 import VentaCheckoutPage from './pages/VentaCheckoutPage';
 import LotesDeudasPage from './pages/LotesDeudasPage';
+import ProveedoresPage from './pages/ProveedoresPage';
 import GastosPage from './pages/GastosPage';
 import LoginPage from './pages/LoginPage';
 import NegocioSelectPage from './pages/NegocioSelectPage';
@@ -40,8 +42,13 @@ import UsuariosPage from './pages/global/UsuariosPage';
 import AuditoriaPage from './pages/global/AuditoriaPage';
 import InventarioGlobalPage from './pages/global/InventarioGlobalPage';
 
+// Import Context
+import { AuthProvider, useAuth } from './context/AuthContext';
+
 // 1. Wrapper para redirigir desde Login si ya está autenticado
-function LoginRouteWrapper({ currentUser, currentNegocio, onLoginSuccess }) {
+function LoginRouteWrapper() {
+  const { currentUser, currentNegocio } = useAuth();
+
   if (currentUser) {
     if (currentUser.rol === 'ADMIN') {
       return <Navigate to="/admin/global/database" replace />;
@@ -54,15 +61,16 @@ function LoginRouteWrapper({ currentUser, currentNegocio, onLoginSuccess }) {
     }
     return <Navigate to="/admin/dashboard" replace />;
   }
-  return <LoginPage onLoginSuccess={onLoginSuccess} />;
+  return <LoginPage />;
 }
 
 // 2. Componente de Layout compartido (Sidebar + Header + Outlet)
-function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onBypassAdminDB }) {
+function AppLayout() {
   const navigate = useNavigate();
+  const { currentUser, currentNegocio, logout, selectNegocio, bypassAdminDB } = useAuth();
 
   const handleSelectNegocioWrapper = (negocio) => {
-    onSelectNegocio(negocio);
+    selectNegocio(negocio);
   };
 
   const getNavItems = () => {
@@ -143,9 +151,17 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
       if (currentNegocio && currentUser.rol === 'DUENO') {
         items.push({ 
           id: 'lotes', 
-          label: 'Lotes/Deudas', 
-          path: '/admin/lotes-deudas', 
+          label: 'Deudas', 
+          path: '/admin/deudas', 
           icon: Coins, 
+          activeColor: 'text-neonCyan', 
+          borderSideColor: 'border-neonCyan' 
+        });
+        items.push({ 
+          id: 'proveedores', 
+          label: 'Proveedores', 
+          path: '/admin/proveedores', 
+          icon: UserCheck, 
           activeColor: 'text-neonCyan', 
           borderSideColor: 'border-neonCyan' 
         });
@@ -194,7 +210,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
                 </div>
                 <button 
                   onClick={() => {
-                    onBypassAdminDB();
+                    bypassAdminDB();
                     navigate('/admin/seleccion-negocio');
                   }}
                   className="text-[9px] text-neonCyan hover:underline font-bold transition-all"
@@ -228,7 +244,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
               <span className="text-[9px] text-neonGreen font-semibold tracking-wider mt-0.5 inline-block">{currentUser.rol}</span>
             </div>
             <button 
-              onClick={onLogout}
+              onClick={logout}
               className="text-carbon-500 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 transition-all flex-shrink-0"
               title="Cerrar Sesión"
             >
@@ -283,7 +299,7 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
                 <span className="text-[9px] text-neonGreen font-semibold tracking-wider mt-0.5 inline-block">{currentUser.rol}</span>
               </div>
               <button 
-                onClick={onLogout}
+                onClick={logout}
                 className="text-carbon-500 hover:text-red-500 p-1.5 rounded-lg bg-carbon-800 border border-carbon-700 transition-all"
                 title="Cerrar Sesión"
               >
@@ -292,16 +308,15 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
             </div>
           </div>
 
-          {/* Sede selection on mobile header (solo para roles operativos) */}
           {currentUser.rol !== 'ADMIN' && (
-            <div className="flex items-center justify-between text-xs border-t border-carbon-800/60 pt-2">
-              <span className="text-[10px] text-carbon-500 font-bold uppercase tracking-wider">Sede:</span>
+            <div className="flex items-center justify-between border-t border-carbon-800 pt-2 text-[10px]">
+              <span className="font-bold text-carbon-500 uppercase">Sede:</span>
               {currentNegocio ? (
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-neonCyan">{currentNegocio.nombre}</span>
+                  <span className="font-sports font-bold text-neonCyan">{currentNegocio.nombre}</span>
                   <button 
                     onClick={() => {
-                      onBypassAdminDB();
+                      bypassAdminDB();
                       navigate('/admin/seleccion-negocio');
                     }}
                     className="text-[9px] text-neonCyan underline font-semibold ml-1"
@@ -363,74 +378,13 @@ function AppLayout({ currentUser, currentNegocio, onLogout, onSelectNegocio, onB
 
 // 3. Componente de Rutas lógicas de la aplicación
 function AppRoutes() {
-  const navigate = useNavigate();
-
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const session = localStorage.getItem('panini_session');
-      return session ? JSON.parse(session) : null;
-    } catch (_) {
-      return null;
-    }
-  });
-
-  const [currentNegocio, setCurrentNegocio] = useState(() => {
-    try {
-      const activeId = localStorage.getItem('active_negocio_id');
-      const activeNombre = localStorage.getItem('active_negocio_nombre');
-      return activeId ? { id: parseInt(activeId), nombre: activeNombre } : null;
-    } catch (_) {
-      return null;
-    }
-  });
-
-  const handleLoginSuccess = (user) => {
-    setCurrentUser(user);
-    localStorage.setItem('panini_session', JSON.stringify(user));
-    if (user.rol === 'ADMIN') {
-      navigate('/admin/global/database');
-    } else {
-      navigate('/admin/seleccion-negocio');
-    }
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentNegocio(null);
-    localStorage.removeItem('panini_session');
-    localStorage.removeItem('active_negocio_id');
-    localStorage.removeItem('active_negocio_nombre');
-    navigate('/');
-  };
-
-  const handleSelectNegocio = (negocio) => {
-    setCurrentNegocio(negocio);
-    localStorage.setItem('active_negocio_id', negocio.id.toString());
-    localStorage.setItem('active_negocio_nombre', negocio.nombre);
-    if (currentUser.rol === 'ORGANIZADOR') {
-      navigate('/admin/inventario');
-    } else {
-      navigate('/admin/dashboard');
-    }
-  };
-
-  const handleBypassAdminDB = () => {
-    setCurrentNegocio(null);
-    localStorage.removeItem('active_negocio_id');
-    localStorage.removeItem('active_negocio_nombre');
-  };
-
   return (
     <Routes>
       {/* 1. Ruta pública de Login */}
       <Route 
         path="/" 
         element={
-          <LoginRouteWrapper 
-            currentUser={currentUser} 
-            currentNegocio={currentNegocio} 
-            onLoginSuccess={handleLoginSuccess} 
-          />
+          <LoginRouteWrapper />
         } 
       />
 
@@ -438,8 +392,6 @@ function AppRoutes() {
       <Route 
         element={
           <ProtectedRoute 
-            currentUser={currentUser} 
-            currentNegocio={currentNegocio} 
             isNegocioSelectionRoute={true} 
           />
         }
@@ -447,12 +399,7 @@ function AppRoutes() {
         <Route 
           path="/admin/seleccion-negocio" 
           element={
-            <NegocioSelectPage 
-              currentUser={currentUser} 
-              onSelectNegocio={handleSelectNegocio} 
-              onBypassAdminDB={handleBypassAdminDB}
-              onLogout={handleLogout} 
-            />
+            <NegocioSelectPage />
           } 
         />
       </Route>
@@ -461,8 +408,6 @@ function AppRoutes() {
       <Route 
         element={
           <ProtectedRoute 
-            currentUser={currentUser} 
-            currentNegocio={currentNegocio} 
             allowedRoles={['ADMIN']} 
             isDbAdminRoute={true} 
           />
@@ -470,13 +415,7 @@ function AppRoutes() {
       >
         <Route 
           element={
-            <AppLayout 
-              currentUser={currentUser} 
-              currentNegocio={currentNegocio} 
-              onLogout={handleLogout} 
-              onSelectNegocio={handleSelectNegocio} 
-              onBypassAdminDB={handleBypassAdminDB} 
-            />
+            <AppLayout />
           }
         >
           <Route path="/admin/global/database" element={<DbConsolePage />} />
@@ -490,40 +429,30 @@ function AppRoutes() {
       {/* 4. Rutas operativas del negocio (Protegidas y requieren selección de negocio) */}
       <Route 
         element={
-          <ProtectedRoute 
-            currentUser={currentUser} 
-            currentNegocio={currentNegocio} 
-          />
+          <ProtectedRoute />
         }
       >
         <Route 
           element={
-            <AppLayout 
-              currentUser={currentUser} 
-              currentNegocio={currentNegocio} 
-              onLogout={handleLogout} 
-              onSelectNegocio={handleSelectNegocio} 
-              onBypassAdminDB={handleBypassAdminDB} 
-            />
+            <AppLayout />
           }
         >
           {/* Vistas restringidas a administradores y dueños */}
           <Route 
             element={
               <ProtectedRoute 
-                currentUser={currentUser} 
-                currentNegocio={currentNegocio} 
                 allowedRoles={['ADMIN', 'DUENO']} 
               />
             }
           >
             <Route path="/admin/dashboard" element={<DashboardPage />} />
-            <Route path="/admin/lotes-deudas" element={<LotesDeudasPage />} />
+            <Route path="/admin/deudas" element={<LotesDeudasPage />} />
+            <Route path="/admin/proveedores" element={<ProveedoresPage />} />
             <Route path="/admin/gastos" element={<GastosPage />} />
           </Route>
 
           {/* Vistas accesibles por todos (ADMIN, DUENO, ORGANIZADOR) */}
-          <Route path="/admin/inventario" element={<InventarioPage currentUser={currentUser} />} />
+          <Route path="/admin/inventario" element={<InventarioPage />} />
           <Route path="/admin/nueva-venta" element={<VentaCheckoutPage />} />
         </Route>
       </Route>
@@ -538,7 +467,9 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

@@ -26,7 +26,7 @@ function LineasVenta({
           onClick={handleAgregarFila}
           className="neon-btn-green flex items-center gap-1 text-xs py-1.5"
         >
-          <Plus size={14} /> Añadir Producto
+          <Plus size={14} /> Añadir Producto (F2)
         </button>
       </div>
 

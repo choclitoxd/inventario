@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { gastosService } from '../services/gastosService';
+import { proveedorService } from '../services/proveedorService';
 
 function useGastos() {
   const [gastos, setGastos] = useState([]);
@@ -18,8 +19,8 @@ function useGastos() {
     setError(null);
     try {
       const [allGastos, allLotes] = await Promise.all([
-        api.listarGastos(),
-        api.listarLotes()
+        gastosService.listarGastos(),
+        proveedorService.listarLotes()
       ]);
       setGastos(allGastos || []);
       setLotes(allLotes || []);
@@ -55,7 +56,7 @@ function useGastos() {
     };
 
     try {
-      await api.registrarGasto(payload);
+      await gastosService.registrarGasto(payload);
       setSuccess('¡Gasto hormiga registrado con éxito!');
       
       // Reset form
@@ -68,7 +69,7 @@ function useGastos() {
       await loadData();
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Error al registrar el gasto.');
+      setError(err.message || 'Error al registrar the expense.');
     } finally {
       setLoading(false);
     }

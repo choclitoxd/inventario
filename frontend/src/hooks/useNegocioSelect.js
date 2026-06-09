@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
-function useNegocioSelect(onSelectNegocio) {
+function useNegocioSelect() {
+  const { selectNegocio } = useAuth();
   const [negocios, setNegocios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,7 +12,7 @@ function useNegocioSelect(onSelectNegocio) {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.listarNegocios();
+      const data = await authService.listarNegocios();
       setNegocios(data || []);
     } catch (err) {
       console.error(err);
@@ -25,9 +27,7 @@ function useNegocioSelect(onSelectNegocio) {
   }, []);
 
   const handleSelect = (negocio) => {
-    localStorage.setItem('active_negocio_id', negocio.id);
-    localStorage.setItem('active_negocio_nombre', negocio.nombre);
-    onSelectNegocio(negocio);
+    selectNegocio(negocio);
   };
 
   return {

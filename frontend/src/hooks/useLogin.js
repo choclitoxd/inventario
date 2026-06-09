@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
-function useLogin(onLoginSuccess) {
+function useLogin() {
+  const { loginSuccess } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,9 +29,9 @@ function useLogin(onLoginSuccess) {
     setError(null);
 
     try {
-      const userSession = await api.login(username.trim(), password);
+      const userSession = await authService.login(username.trim(), password);
       if (userSession) {
-        onLoginSuccess(userSession);
+        loginSuccess(userSession);
       } else {
         setError('Error al iniciar sesión. Verifica las credenciales.');
       }

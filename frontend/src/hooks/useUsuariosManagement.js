@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
 
 function useUsuariosManagement() {
   const [usuarios, setUsuarios] = useState([]);
@@ -30,7 +30,7 @@ function useUsuariosManagement() {
     setLoading(true);
     setError(null);
     try {
-      const users = await api.listarUsuarios();
+      const users = await authService.listarUsuarios();
       setUsuarios(users || []);
     } catch (err) {
       console.error(err);
@@ -64,7 +64,7 @@ function useUsuariosManagement() {
 
     setLoading(true);
     try {
-      await api.crearUsuario({
+      await authService.crearUsuario({
         username: username.trim().toLowerCase(),
         password: password.trim(),
         nombre: nombre.trim(),
@@ -101,7 +101,7 @@ function useUsuariosManagement() {
       if (password && password.trim()) {
         payload.password = password.trim();
       }
-      await api.actualizarUsuario(id, payload);
+      await authService.actualizarUsuario(id, payload);
       setSuccess('Usuario actualizado exitosamente.');
       setEditingUsuario(null);
       setShowEditModal(false);
@@ -125,7 +125,7 @@ function useUsuariosManagement() {
 
     setLoading(true);
     try {
-      await api.eliminarUsuario(id);
+      await authService.eliminarUsuario(id);
       setSuccess('Usuario eliminado exitosamente.');
       await loadData();
     } catch (err) {

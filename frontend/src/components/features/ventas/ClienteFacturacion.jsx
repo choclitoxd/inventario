@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, X, Search, Check, Plus, AlertCircle } from 'lucide-react';
-import { api } from '../../../services/api';
+import { ventasService } from '../../../services/ventasService';
 
 function ClienteFacturacion({
   telefono,
@@ -55,7 +55,7 @@ function ClienteFacturacion({
     const delayDebounceFn = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const data = await api.buscarClientesPredictivo(searchQuery);
+        const data = await ventasService.buscarClientesPredictivo(searchQuery);
         setSearchResults(data || []);
       } catch (err) {
         console.error(err);
@@ -108,7 +108,7 @@ function ClienteFacturacion({
     setModalLoading(true);
     setModalError('');
     try {
-      const saved = await api.registrarCliente({
+      const saved = await ventasService.registrarCliente({
         nombre: newNombre.trim(),
         telefono: newTelefono.trim()
       });
@@ -144,80 +144,87 @@ function ClienteFacturacion({
           </button>
         </div>
 
-        <div className="flex flex-col gap-1.5 relative">
-          <label className="text-xs font-bold text-carbon-500">BÚSQUEDA DE CLIENTE (NOMBRE O TELÉFONO)</label>
-          <div className="relative flex items-center">
-            <span className="absolute left-3 text-zinc-500">
-              <Search size={14} />
+        {clienteId ? (
+          <div className="bg-zinc-900/80 border border-emerald-500/30 px-4 py-3 rounded-xl flex justify-between items-center animate-fadeIn">
+            <span className="text-sm text-zinc-100 font-medium">
+              Cliente: {nombre} - {telefono}
             </span>
-            <input
-              type="text"
-              placeholder="Escribe el nombre o teléfono del cliente..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowDropdown(true);
-              }}
-              onFocus={() => setShowDropdown(true)}
-              disabled={!!clienteId}
-              className={`bg-carbon-800 border border-carbon-700 rounded-xl pl-9 pr-8 py-2 text-sm text-zinc-100 focus:outline-none focus:border-neonGreen w-full ${
-                clienteId ? 'opacity-80 cursor-not-allowed bg-carbon-900 border-carbon-800' : ''
-              }`}
-            />
-            {(searchQuery.trim() || clienteId) && (
-              <button
-                type="button"
-                onClick={handleClear}
-                className="absolute right-3 text-zinc-500 hover:text-red-500 transition-colors"
-                title="Limpiar búsqueda"
-              >
-                <X size={14} />
-              </button>
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-zinc-500 hover:text-red-400 transition-colors"
+              title="Quitar cliente"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5 relative">
+            <label className="text-xs font-bold text-carbon-500">BÚSQUEDA DE CLIENTE (NOMBRE O TELÉFONO)</label>
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-zinc-500">
+                <Search size={14} />
+              </span>
+              <input
+                type="text"
+                placeholder="Escribe el nombre o teléfono del cliente..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                className="bg-carbon-800 border border-carbon-700 rounded-xl pl-9 pr-8 py-2 text-sm text-zinc-100 focus:outline-none focus:border-neonGreen w-full"
+              />
+              {searchQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="absolute right-3 text-zinc-500 hover:text-red-500 transition-colors"
+                  title="Limpiar búsqueda"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Dropdown Predictivo */}
+            {showDropdown && searchQuery.trim() && (
+              <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-carbon-900 border border-carbon-800 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto animate-fadeIn">
+                <div className="py-1">
+                  {isSearching && (
+                    <div className="px-4 py-2 text-xs text-zinc-555 italic">Buscando...</div>
+                  )}
+
+                  {!isSearching && searchResults.length > 0 && (
+                    searchResults.map((c) => (
+                      <div
+                        key={c.id}
+                        onClick={() => handleSelectCliente(c)}
+                        className="px-4 py-2 hover:bg-carbon-800 text-zinc-300 hover:text-white cursor-pointer text-xs flex justify-between items-center transition-colors"
+                      >
+                        <span className="font-semibold">{c.nombre}</span>
+                        <span className="text-zinc-500 font-mono text-[11px]">[{c.telefono}]</span>
+                      </div>
+                    ))
+                  )}
+
+                  {!isSearching && searchResults.length === 0 && (
+                    <div className="px-4 py-3 text-xs text-zinc-555 italic flex flex-col gap-1">
+                      <span>No se encontraron coincidencias.</span>
+                      <button
+                        type="button"
+                        onClick={handleOpenModal}
+                        className="text-left text-neonGreen hover:text-neonGreen/80 font-bold underline mt-1 animate-pulse"
+                      >
+                        + Registrar como cliente nuevo
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-
-          {/* Dropdown Predictivo */}
-          {showDropdown && searchQuery.trim() && !(clienteId && searchQuery === `${nombre} - [${telefono}]`) && (
-            <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-carbon-900 border border-carbon-800 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto animate-fadeIn">
-              <div className="py-1">
-                {isSearching && (
-                  <div className="px-4 py-2 text-xs text-zinc-555 italic">Buscando...</div>
-                )}
-
-                {!isSearching && searchResults.length > 0 && (
-                  searchResults.map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => handleSelectCliente(c)}
-                      className="px-4 py-2 hover:bg-carbon-800 text-zinc-300 hover:text-white cursor-pointer text-xs flex justify-between items-center transition-colors"
-                    >
-                      <span className="font-semibold">{c.nombre}</span>
-                      <span className="text-zinc-500 font-mono text-[11px]">[{c.telefono}]</span>
-                    </div>
-                  ))
-                )}
-
-                {!isSearching && searchResults.length === 0 && (
-                  <div className="px-4 py-3 text-xs text-zinc-555 italic flex flex-col gap-1">
-                    <span>No se encontraron coincidencias.</span>
-                    <button
-                      type="button"
-                      onClick={handleOpenModal}
-                      className="text-left text-neonGreen hover:text-neonGreen/80 font-bold underline mt-1 animate-pulse"
-                    >
-                      + Registrar como cliente nuevo
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {clienteEncontrado && (
-          <span className="text-xs text-neonGreen font-semibold flex items-center gap-1.5 animate-fadeIn">
-            <Check size={14} /> Cliente seleccionado (vínculo automático a la venta).
-          </span>
         )}
       </div>
 

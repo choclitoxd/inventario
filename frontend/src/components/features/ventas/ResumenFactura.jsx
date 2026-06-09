@@ -6,9 +6,12 @@ function ResumenFactura({
   detalles,
   calcularTotal,
   formatCOP,
-  loading
+  loading,
+  nroReferencia,
+  setNroReferencia
 }) {
   const total = calcularTotal();
+  const isButtonDisabled = loading || detalles.length === 0 || (metodoPago === 'TRANSFERENCIA' && (!nroReferencia || !nroReferencia.trim()));
 
   return (
     <div className="glass-panel p-6 space-y-6 border-l-4 border-l-neonGreen">
@@ -42,6 +45,17 @@ function ResumenFactura({
             Transferencia
           </button>
         </div>
+        {metodoPago === 'TRANSFERENCIA' && (
+          <div className="animate-fadeIn">
+            <input
+              type="text"
+              placeholder="NRO. REFERENCIA / COMPROBANTE"
+              value={nroReferencia || ''}
+              onChange={(e) => setNroReferencia(e.target.value)}
+              className="bg-zinc-950 border border-zinc-800 text-xs text-white p-2.5 rounded-lg w-full placeholder-zinc-600 mt-2 focus:border-emerald-500 focus:outline-none"
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-3 bg-carbon-950 p-4 rounded-xl border border-carbon-800">
@@ -63,9 +77,9 @@ function ResumenFactura({
 
       <button
         type="submit"
-        disabled={loading || detalles.length === 0}
+        disabled={isButtonDisabled}
         className={`w-full text-center py-3 rounded-xl font-sports font-extrabold text-sm tracking-wider transition-all duration-300 ${
-          loading || detalles.length === 0
+          isButtonDisabled
             ? 'bg-carbon-800 border border-carbon-700 text-carbon-600 cursor-not-allowed'
             : 'neon-btn-green glow-green-intense'
         }`}

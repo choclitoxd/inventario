@@ -32,8 +32,23 @@ function VentaCheckoutPage() {
     handleRemoverFila,
     calcularTotal,
     handleRealizarVenta,
-    formatCOP
+    formatCOP,
+    nroReferencia,
+    setNroReferencia
   } = useVentaCheckout();
+
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'F2') {
+        e.preventDefault();
+        handleAgregarFila();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleAgregarFila]);
 
   return (
     <div className="space-y-6">
@@ -102,6 +117,8 @@ function VentaCheckoutPage() {
             calcularTotal={calcularTotal}
             formatCOP={formatCOP}
             loading={loading}
+            nroReferencia={nroReferencia}
+            setNroReferencia={setNroReferencia}
           />
         </div>
 

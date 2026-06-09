@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { authService } from '../services/authService';
+import { inventarioService } from '../services/inventarioService';
+import { ventasService } from '../services/ventasService';
 
 function useVentaCheckout() {
   const [productos, setProductos] = useState([]);
@@ -13,6 +15,7 @@ function useVentaCheckout() {
   
   // Sale details
   const [metodoPago, setMetodoPago] = useState('EFECTIVO');
+  const [nroReferencia, setNroReferencia] = useState('');
   const [detalles, setDetalles] = useState([]); // Cart items
   
   // UI states
@@ -26,8 +29,8 @@ function useVentaCheckout() {
   const loadInitialData = async () => {
     try {
       const [prods, invs] = await Promise.all([
-        api.listarProductos(),
-        api.listarInventario()
+        authService.listarProductos(),
+        inventarioService.listarInventario()
       ]);
       setProductos(prods || []);
       setInventarios(invs || []);
@@ -48,7 +51,7 @@ function useVentaCheckout() {
     setClienteId(null);
     setNombre('');
     try {
-      const cliente = await api.buscarClientePorTelefono(telefono);
+      const cliente = await ventasService.buscarClientePorTelefono(telefono);
       if (cliente) {
         setNombre(cliente.nombre);
         setClienteId(cliente.id);
@@ -99,7 +102,7 @@ function useVentaCheckout() {
     // Fetch suggested prices from historical sales
     if (prodId && !preciosSugeridos[prodId]) {
       try {
-        const sugerencias = await api.obtenerPreciosSugeridos(prodId);
+        const sugerencias = await ventasService.obtenerPreciosSugeridos(prodId);
         setPreciosSugeridos(prev => ({
           ...prev,
           [prodId]: sugerencias
@@ -112,7 +115,7 @@ function useVentaCheckout() {
     // Si es un combo, cargar los componentes del combo
     if (item.esCombo) {
       try {
-        const componentes = await api.obtenerComposicionCombo(item.productoId);
+        const componentes = await authService.obtenerComposicionCombo(item.productoId);
         item.componentesCombo = componentes.map(c => ({
           productoId: c.productoComponenteId,
           productoNombre: c.productoComponenteNombre,
@@ -224,16 +227,17 @@ function useVentaCheckout() {
     };
 
     try {
-      await api.registrarVenta(payload);
+      await ventasService.registrarVenta(payload);
       setSuccess(true);
       // Reset
       setTelefono('');
       setNombre('');
       setClienteEncontrado(false);
       setClienteId(null);
+      setNroReferencia('');
       setDetalles([]);
       // Reload stocks
-      const invs = await api.listarInventario();
+      const invs = await inventarioService.listarInventario();
       setInventarios(invs);
     } catch (err) {
       console.error(err);
@@ -279,7 +283,9 @@ function useVentaCheckout() {
     handleRemoverFila,
     calcularTotal,
     handleRealizarVenta,
-    formatCOP
+    formatCOP,
+    nroReferencia,
+    setNroReferencia
   };
 }
 

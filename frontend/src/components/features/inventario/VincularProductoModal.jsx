@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, AlertCircle } from 'lucide-react';
 import CustomSelect from '../../common/CustomSelect';
 import NumericStepper from '../../common/NumericStepper';
-import { api } from '../../../services/api';
+import { proveedorService } from '../../../services/proveedorService';
 
 function VincularProductoModal({ 
   isOpen, 
@@ -69,7 +69,7 @@ function VincularProductoModal({
       const providerId = selectedLoteObj?.proveedor?.id;
       if (providerId) {
         try {
-          const res = await api.listarTarifasPorProveedor(providerId);
+          const res = await proveedorService.listarTarifasPorProveedor(providerId);
           setTarifasProveedor(res || []);
         } catch (err) {
           console.error('Error al cargar tarifas de proveedor:', err);
@@ -83,7 +83,10 @@ function VincularProductoModal({
 
   // Effect to auto-fill costs when product or provider's tariffs change
   useEffect(() => {
-    if (!productoId || tarifasProveedor.length === 0) {
+    if (!productoId) {
+      setCostoCompraPaca(0);
+      setCostoCompraCaja(0);
+      setCostoCompraUnidad(0);
       return;
     }
     const matching = tarifasProveedor.find(t => t.producto?.id === Number(productoId));
@@ -91,12 +94,21 @@ function VincularProductoModal({
       if (isAlbumes) {
         setCostoCompraPaca(matching.costoPactado || 0);
         setCostoCompraUnidad(Math.round((matching.costoPactado || 0) / 26));
+        setCostoCompraCaja(0);
       } else if (isLaminas) {
         setCostoCompraCaja(matching.costoPactado || 0);
         setCostoCompraUnidad(Math.round((matching.costoPactado || 0) / 104));
+        setCostoCompraPaca(0);
       } else {
         setCostoCompraUnidad(matching.costoPactado || 0);
+        setCostoCompraPaca(0);
+        setCostoCompraCaja(0);
       }
+    } else {
+      // Reset if no matching tariff
+      setCostoCompraPaca(0);
+      setCostoCompraCaja(0);
+      setCostoCompraUnidad(0);
     }
   }, [productoId, tarifasProveedor, isAlbumes, isLaminas]);
 

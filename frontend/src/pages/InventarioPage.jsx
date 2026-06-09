@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import useInventario from '../hooks/useInventario';
 import ConversionGuide from '../components/features/inventario/ConversionGuide';
 import InventarioGrid from '../components/features/inventario/InventarioGrid';
@@ -6,10 +6,11 @@ import LotesDesgloseModal from '../components/features/inventario/LotesDesgloseM
 import VincularProductoModal from '../components/features/inventario/VincularProductoModal';
 import EditarInventarioModal from '../components/features/inventario/EditarInventarioModal';
 import ErrorMessage from '../components/common/ErrorMessage';
-import KpiCard from '../components/common/KpiCard';
 import { Package, Sparkles, Plus } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
-function InventarioPage({ currentUser }) {
+function InventarioPage() {
+  const { currentUser } = useAuth();
   const {
     productosAgrupados,
     productos,
@@ -23,17 +24,17 @@ function InventarioPage({ currentUser }) {
     handleEliminarInventario,
     fetchProductosAndLotes,
     formatCOP,
-    inversionTotalVal
+    inversionTotalVal,
+    
+    // UI States and handlers from hook
+    selectedProductId,
+    setSelectedProductId,
+    showVincularModal,
+    setShowVincularModal,
+    editingInventario,
+    setEditingInventario,
+    activeProduct
   } = useInventario();
-
-  const [selectedProductId, setSelectedProductId] = useState(null);
-  const [showVincularModal, setShowVincularModal] = useState(false);
-  const [editingInventario, setEditingInventario] = useState(null);
-
-  // Buscar el producto activo de la lista actualizada para refrescar existencias al operar dentro del modal
-  const activeProduct = productosAgrupados.find(
-    (p) => p.producto.id === selectedProductId
-  );
 
   return (
     <div className="space-y-6">

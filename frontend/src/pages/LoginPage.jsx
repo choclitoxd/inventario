@@ -4,7 +4,7 @@ import LoginForm from '../components/features/login/LoginForm';
 import QuickLoginGrid from '../components/features/login/QuickLoginGrid';
 import { Shield, Layers } from 'lucide-react';
 
-function LoginPage({ onLoginSuccess }) {
+function LoginPage() {
   const {
     username,
     setUsername,
@@ -14,7 +14,7 @@ function LoginPage({ onLoginSuccess }) {
     error,
     handleSelectQuickUser,
     handleLogin
-  } = useLogin(onLoginSuccess);
+  } = useLogin();
 
   return (
     <div className="min-h-screen bg-carbon-950 flex flex-col justify-center items-center p-4 relative overflow-hidden text-zinc-100 font-body">

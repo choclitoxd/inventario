@@ -1,16 +1,18 @@
 import React from 'react';
 import useNegocioSelect from '../hooks/useNegocioSelect';
 import NegocioGrid from '../components/features/negocio/NegocioGrid';
+import { useAuth } from '../context/AuthContext';
 import { Store, LogOut, Database } from 'lucide-react';
 
-function NegocioSelectPage({ onSelectNegocio, onLogout, currentUser, onBypassAdminDB }) {
+function NegocioSelectPage() {
+  const { currentUser, logout, bypassAdminDB } = useAuth();
   const {
     negocios,
     loading,
     error,
     handleSelect,
     loadNegocios
-  } = useNegocioSelect(onSelectNegocio);
+  } = useNegocioSelect();
 
   return (
     <div className="min-h-screen bg-carbon-950 flex flex-col justify-center items-center p-4 relative overflow-hidden text-zinc-100 font-body">
@@ -64,7 +66,7 @@ function NegocioSelectPage({ onSelectNegocio, onLogout, currentUser, onBypassAdm
               {currentUser && currentUser.rol === 'ADMIN' && (
                 <div className="pt-4 border-t border-carbon-800 flex justify-center">
                   <button
-                    onClick={onBypassAdminDB}
+                    onClick={bypassAdminDB}
                     className="flex items-center gap-2 text-xs font-semibold text-neonCyan hover:underline transition-all duration-200"
                   >
                     <Database size={14} />
@@ -75,7 +77,7 @@ function NegocioSelectPage({ onSelectNegocio, onLogout, currentUser, onBypassAdm
 
               <div className="pt-4 border-t border-carbon-800 flex justify-center">
                 <button
-                  onClick={onLogout}
+                  onClick={logout}
                   className="flex items-center gap-2 text-xs font-semibold text-carbon-400 hover:text-red-400 transition-colors"
                 >
                   <LogOut size={14} />

@@ -1,13 +1,14 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function ProtectedRoute({ 
-  currentUser, 
-  currentNegocio, 
   allowedRoles, 
   isNegocioSelectionRoute = false,
   isDbAdminRoute = false
 }) {
+  const { currentUser, currentNegocio } = useAuth();
+
   // 1. Si no está autenticado, redirigir al login (/)
   if (!currentUser) {
     return <Navigate to="/" replace />;
