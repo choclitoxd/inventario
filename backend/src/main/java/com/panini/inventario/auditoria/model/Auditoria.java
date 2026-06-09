@@ -1,6 +1,7 @@
 package com.panini.inventario.auditoria.model;
 
 import com.panini.inventario.negocio.model.Negocio;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class Auditoria {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "negocio_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Negocio negocio;
 
     @Column(name = "fecha", updatable = false)

@@ -63,6 +63,7 @@ export const api = {
   // Clientes
   listarClientes: () => request('/api/clientes'),
   buscarClientePorTelefono: (telefono) => request(`/api/clientes/buscar?telefono=${encodeURIComponent(telefono)}`),
+  buscarClientesPredictivo: (query) => request(`/api/clientes/search?query=${encodeURIComponent(query)}`),
   registrarCliente: (cliente) => request('/api/clientes', { method: 'POST', body: JSON.stringify(cliente) }),
 
   // Productos
@@ -72,7 +73,6 @@ export const api = {
   eliminarProductoAdmin: (id) => request(`/api/admin/productos/${id}`, { method: 'DELETE' }),
   crearCombo: (dto) => request('/api/productos/combos', { method: 'POST', body: JSON.stringify(dto) }),
   obtenerComposicionCombo: (id) => request(`/api/productos/${id}/composicion`),
-
   // Lotes e Inversionistas
   listarLotes: () => request('/api/lotes'),
   listarDeudasInversionistas: () => request('/api/lotes/inversionistas/deudas'),
@@ -81,7 +81,14 @@ export const api = {
     method: 'POST', 
     body: JSON.stringify({ monto, notas }) 
   }),
-
+  actualizarLote: (id, dto) => request(`/api/lotes/${id}`, { method: 'PUT', body: JSON.stringify(dto) }),
+  eliminarLote: (id) => request(`/api/lotes/${id}`, { method: 'DELETE' }),
+  listarProveedores: () => request('/api/proveedores'),
+  registrarProveedor: (dto) => request('/api/proveedores', { method: 'POST', body: JSON.stringify(dto) }),
+  listarTarifas: () => request('/api/proveedores/tarifas'),
+  listarTarifasPorProveedor: (proveedorId) => request(`/api/proveedores/tarifas/proveedor/${proveedorId}`),
+  guardarTarifa: (dto) => request('/api/proveedores/tarifas', { method: 'POST', body: JSON.stringify(dto) }),
+  eliminarTarifa: (id) => request(`/api/proveedores/tarifas/${id}`, { method: 'DELETE' }),
   // Inventario
   listarInventario: () => request('/api/inventario'),
   obtenerInventarioGlobal: () => request('/api/inventario/global'),

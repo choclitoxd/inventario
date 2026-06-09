@@ -3,11 +3,12 @@ package com.panini.inventario.lote.model;
 import jakarta.persistence.*;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "lotes_inversionistas")
+@Table(name = "lotes_proveedores")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,8 +26,15 @@ public class LoteInversionista {
     @Column(nullable = false)
     private Financiador financiador;
 
-    @Column(name = "nombre_inversionista", length = 150)
+    @Column(name = "nombre_proveedor", length = 150)
+    @JsonProperty("nombreProveedor")
     private String nombreInversionista;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proveedor_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonProperty("proveedor")
+    private Inversionista inversionista;
 
     @Column(name = "monto_prestado", precision = 15, scale = 2)
     private BigDecimal montoPrestado;

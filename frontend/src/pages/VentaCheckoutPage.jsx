@@ -14,6 +14,9 @@ function VentaCheckoutPage() {
     nombre,
     setNombre,
     clienteEncontrado,
+    setClienteEncontrado,
+    clienteId,
+    setClienteId,
     metodoPago,
     setMetodoPago,
     detalles,
@@ -71,7 +74,9 @@ function VentaCheckoutPage() {
             nombre={nombre}
             setNombre={setNombre}
             clienteEncontrado={clienteEncontrado}
-            handleBuscarCliente={handleBuscarCliente}
+            setClienteEncontrado={setClienteEncontrado}
+            clienteId={clienteId}
+            setClienteId={setClienteId}
           />
 
           <LineasVenta

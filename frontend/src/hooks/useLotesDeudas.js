@@ -2,26 +2,36 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 function useLotesDeudas() {
-  const [productos, setProductos] = useState([]);
   const [deudas, setDeudas] = useState([]);
   const [lotes, setLotes] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
+  const [productos, setProductos] = useState([]);
+  const [tarifas, setTarifas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [userRole, setUserRole] = useState(() => {
+    try {
+      const sessionStr = localStorage.getItem('panini_session');
+      if (sessionStr) {
+        const session = JSON.parse(sessionStr);
+        return session ? session.rol : '';
+      }
+    } catch (_) {}
+    return '';
+  });
 
-  // New Lot Form State
+  // New Lot Form State (kept for DTO compatibility if lot creation is still triggered programmatically)
   const [nombreLote, setNombreLote] = useState('');
-  const [financiador, setFinanciador] = useState('DUENO_A');
-  const [nombreInversionista, setNombreInversionista] = useState('');
+  const [financiador, setFinanciador] = useState('DUENO_A'); // DUENO_A, DUENO_B, INVERSIONISTA_EXTERNO
+  const [proveedorId, setProveedorId] = useState('');
   const [deudaInicial, setDeudaInicial] = useState('');
   const [porcentajeAmortizacion, setPorcentajeAmortizacion] = useState('');
-  const [productoId, setProductoId] = useState('');
-  const [cantPacas, setCantPacas] = useState('');
-  const [cantCajas, setCantCajas] = useState('');
-  const [cantUnidades, setCantUnidades] = useState('');
-  const [costoPaca, setCostoPaca] = useState('');
-  const [costoCaja, setCostoCaja] = useState('');
-  const [costoUnidad, setCostoUnidad] = useState('');
+
+  // Provider Modal State
+  const [isProvModalOpen, setIsProvModalOpen] = useState(false);
+  const [newProvNombre, setNewProvNombre] = useState('');
+  const [newProvTelefono, setNewProvTelefono] = useState('');
 
   // Manual Amortization Modal/Inline State
   const [showAbonoForm, setShowAbonoForm] = useState(null); // stores loteId if open
@@ -31,23 +41,112 @@ function useLotesDeudas() {
   const loadData = async () => {
     setError(null);
     try {
-      const [prods, deuds, allLotes] = await Promise.all([
+      const [provs, deuds, allLotes, prodList, tariffList] = await Promise.all([
+        api.listarProveedores(),
+        api.listarDeudasInversionistas(), // Endpoint retains name on backend but fetches suppliers' debt
+        api.listarLotes(),
         api.listarProductos(),
-        api.listarDeudasInversionistas(),
-        api.listarLotes()
+        api.listarTarifas()
       ]);
-      setProductos(prods || []);
+      setProveedores(provs || []);
       setDeudas(deuds || []);
       setLotes(allLotes || []);
+      setProductos(prodList || []);
+      setTarifas(tariffList || []);
     } catch (err) {
       console.error(err);
-      setError('Error al obtener datos de lotes y financiamiento.');
+      setError('Error al obtener datos de lotes, proveedores y catálogo de tarifas.');
     }
   };
 
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleSaveProveedor = async (nombre, telefono) => {
+    setError(null);
+    setSuccess(null);
+    if (!nombre || !nombre.trim()) {
+      setError('Por favor, ingresa el nombre del proveedor.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const saved = await api.registrarProveedor({
+        nombre: nombre.trim(),
+        telefono: telefono ? telefono.trim() : ''
+      });
+      setSuccess('¡Proveedor registrado con éxito!');
+      
+      // Reload list of suppliers
+      const provs = await api.listarProveedores();
+      setProveedores(provs || []);
+      
+      // Auto-select newly created supplier
+      if (saved && saved.id) {
+        setFinanciador('INVERSIONISTA_EXTERNO');
+        setProveedorId(saved.id.toString());
+      }
+      
+      // Reset modal inputs
+      setNewProvNombre('');
+      setNewProvTelefono('');
+      setIsProvModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al registrar el proveedor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveTarifa = async (proveedorId, productoId, costoPactado) => {
+    setError(null);
+    setSuccess(null);
+    if (!proveedorId) {
+      setError('Por favor, selecciona un proveedor.');
+      return;
+    }
+    if (!productoId) {
+      setError('Por favor, selecciona un producto.');
+      return;
+    }
+    if (costoPactado <= 0) {
+      setError('Por favor, ingresa un costo unitario pactado mayor a cero.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.guardarTarifa({
+        proveedorId: Number(proveedorId),
+        productoId: Number(productoId),
+        costoPactado: Number(costoPactado)
+      });
+      setSuccess('¡Tarifa vinculada con éxito!');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al vincular el producto al proveedor.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEliminarTarifa = async (id) => {
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+    try {
+      await api.eliminarTarifa(id);
+      setSuccess('¡Tarifa eliminada con éxito!');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al eliminar la tarifa.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCrearLote = async (e) => {
     if (e && e.preventDefault) {
@@ -56,8 +155,13 @@ function useLotesDeudas() {
     setError(null);
     setSuccess(null);
 
-    if (!nombreLote.trim() || !productoId) {
-      setError('Por favor, ingresa el nombre del lote y selecciona un producto.');
+    if (!nombreLote.trim()) {
+      setError('Por favor, ingresa el nombre del lote.');
+      return;
+    }
+
+    if (financiador === 'INVERSIONISTA_EXTERNO' && !proveedorId) {
+      setError('Por favor, selecciona un proveedor.');
       return;
     }
 
@@ -66,40 +170,26 @@ function useLotesDeudas() {
     const payload = {
       nombreLote: nombreLote.trim(),
       financiador,
-      porcentajeGananciaAmortizacion: financiador === 'INVERSIONISTA_EXTERNO' ? Number(porcentajeAmortizacion) : 0,
-      deudaInicial: financiador === 'INVERSIONISTA_EXTERNO' ? Number(deudaInicial) : 0,
-      productoId: Number(productoId),
-      cantPacas: Number(cantPacas) || 0,
-      cantCajas: Number(cantCajas) || 0,
-      cantUnidades: Number(cantUnidades) || 0,
-      costoCompraPaca: Number(costoPaca) || 0,
-      costoCompraCaja: Number(costoCaja) || 0,
-      costoCompraUnidad: Number(costoUnidad) || 0,
-      nombreInversionista: financiador === 'INVERSIONISTA_EXTERNO' ? nombreInversionista.trim() : null
+      proveedorId: financiador === 'INVERSIONISTA_EXTERNO' && proveedorId ? Number(proveedorId) : null,
+      montoPrestado: Number(deudaInicial) || 0,
+      porcentajeGananciaAmortizacion: financiador === 'INVERSIONISTA_EXTERNO' ? Number(porcentajeAmortizacion) : 0
     };
 
     try {
       await api.registrarEntradaLote(payload);
-      setSuccess('¡Entrada de lote registrada con éxito! El inventario ha sido incrementado.');
+      setSuccess('¡Lote registrado con éxito!');
       
       // Reset form
       setNombreLote('');
       setFinanciador('DUENO_A');
-      setNombreInversionista('');
+      setProveedorId('');
       setDeudaInicial('');
       setPorcentajeAmortizacion('');
-      setProductoId('');
-      setCantPacas('');
-      setCantCajas('');
-      setCantUnidades('');
-      setCostoPaca('');
-      setCostoCaja('');
-      setCostoUnidad('');
 
       await loadData();
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Error al registrar el lote de mercancía.');
+      setError(err.message || 'Error al registrar el lote.');
     } finally {
       setLoading(false);
     }
@@ -145,10 +235,44 @@ function useLotesDeudas() {
     }).format(val || 0);
   };
 
+  const handleEditarLote = async (id, nombre, monto, saldo) => {
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+    try {
+      await api.actualizarLote(id, { nombreLote: nombre, montoPrestado: monto, saldoPendiente: saldo });
+      setSuccess('¡Lote actualizado con éxito!');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al actualizar el lote.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEliminarLote = async (id) => {
+    setError(null);
+    setSuccess(null);
+    setLoading(true);
+    try {
+      await api.eliminarLote(id);
+      setSuccess('¡Lote eliminado con éxito!');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Error al eliminar el lote.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
-    productos,
     deudas,
     lotes,
+    proveedores,
+    productos,
+    tarifas,
     loading,
     error,
     setError,
@@ -158,26 +282,21 @@ function useLotesDeudas() {
     setNombreLote,
     financiador,
     setFinanciador,
-    nombreInversionista,
-    setNombreInversionista,
+    proveedorId,
+    setProveedorId,
     deudaInicial,
     setDeudaInicial,
     porcentajeAmortizacion,
     setPorcentajeAmortizacion,
-    productoId,
-    setProductoId,
-    cantPacas,
-    setCantPacas,
-    cantCajas,
-    setCantCajas,
-    cantUnidades,
-    setCantUnidades,
-    costoPaca,
-    setCostoPaca,
-    costoCaja,
-    setCostoCaja,
-    costoUnidad,
-    setCostoUnidad,
+    isProvModalOpen,
+    setIsProvModalOpen,
+    newProvNombre,
+    setNewProvNombre,
+    newProvTelefono,
+    setNewProvTelefono,
+    handleSaveProveedor,
+    handleSaveTarifa,
+    handleEliminarTarifa,
     showAbonoForm,
     setShowAbonoForm,
     abonoMonto,
@@ -187,7 +306,10 @@ function useLotesDeudas() {
     handleCrearLote,
     handleRegistrarAbono,
     formatCOP,
-    loadData
+    loadData,
+    userRole,
+    handleEditarLote,
+    handleEliminarLote
   };
 }
 

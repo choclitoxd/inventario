@@ -1,6 +1,7 @@
 package com.panini.inventario.gasto.model;
 
 import com.panini.inventario.lote.model.LoteInversionista;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -33,10 +34,12 @@ public class GastoHormiga {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lote_inversionista_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private LoteInversionista loteInversionista;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "negocio_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private com.panini.inventario.negocio.model.Negocio negocio;
 
     @PrePersist

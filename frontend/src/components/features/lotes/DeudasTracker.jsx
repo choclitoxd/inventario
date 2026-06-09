@@ -17,7 +17,7 @@ function DeudasTracker({
   return (
     <div className="glass-panel p-6 space-y-4">
       <h3 className="text-base font-sports font-bold text-white flex items-center gap-2 border-b border-carbon-800 pb-3">
-        <DollarSign size={18} className="text-red-500" /> Amortizaciones y Saldos Pendientes (Inversionistas)
+        <DollarSign size={18} className="text-red-500" /> Amortizaciones y Saldos Pendientes (Proveedores)
       </h3>
 
       {deudas.length === 0 ? (

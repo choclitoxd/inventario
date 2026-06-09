@@ -1,18 +1,18 @@
-package com.panini.inventario.cliente.model;
+package com.panini.inventario.lote.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.panini.inventario.negocio.model.Negocio;
 
 @Entity
-@Table(name = "clientes")
+@Table(name = "proveedores")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cliente {
+public class Inversionista {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -20,21 +20,11 @@ public class Cliente {
     @Column(nullable = false, length = 150)
     private String nombre;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(length = 50)
     private String telefono;
-
-    @Column(name = "fecha_registro", updatable = false)
-    private LocalDateTime fechaRegistro;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "negocio_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private com.panini.inventario.negocio.model.Negocio negocio;
-
-    @PrePersist
-    protected void onCreate() {
-        if (fechaRegistro == null) {
-            fechaRegistro = LocalDateTime.now();
-        }
-    }
+    private Negocio negocio;
 }

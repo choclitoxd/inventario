@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, AlertCircle } from 'lucide-react';
 import CustomSelect from '../../common/CustomSelect';
 import NumericStepper from '../../common/NumericStepper';
+import { api } from '../../../services/api';
 
 function VincularProductoModal({ 
   isOpen, 
@@ -27,6 +28,8 @@ function VincularProductoModal({
   const [formError, setFormError] = useState('');
   const [loadingForm, setLoadingForm] = useState(false);
 
+  const [tarifasProveedor, setTarifasProveedor] = useState([]);
+
   useEffect(() => {
     if (isOpen) {
       fetchProductosAndLotes();
@@ -40,6 +43,7 @@ function VincularProductoModal({
       setCostoCompraCaja(0);
       setCostoCompraUnidad(0);
       setFormError('');
+      setTarifasProveedor([]);
     }
   }, [isOpen]);
 
@@ -49,6 +53,52 @@ function VincularProductoModal({
   const isLaminas = selectedProduct?.tipo === 'FRACCIONADO_LAMINAS' || selectedProduct?.tipo === 'LAMINAS';
   const isAlbumes = selectedProduct?.tipo === 'FRACCIONADO_ALBUMES' || selectedProduct?.tipo === 'ALBUM';
   const isUnidadSimple = selectedProduct?.tipo === 'UNIDAD_SIMPLE' || (selectedProduct && !isLaminas && !isAlbumes);
+
+  const selectedLoteObj = lotes.find(l => l.id === Number(loteId));
+  const providerId = selectedLoteObj?.proveedor?.id;
+  const isTarifaPactada = providerId && tarifasProveedor.some(t => t.producto?.id === Number(productoId));
+
+  // Effect to load provider's tariffs when loteId is changed
+  useEffect(() => {
+    const fetchTarifas = async () => {
+      if (!loteId) {
+        setTarifasProveedor([]);
+        return;
+      }
+      const selectedLoteObj = lotes.find(l => l.id === Number(loteId));
+      const providerId = selectedLoteObj?.proveedor?.id;
+      if (providerId) {
+        try {
+          const res = await api.listarTarifasPorProveedor(providerId);
+          setTarifasProveedor(res || []);
+        } catch (err) {
+          console.error('Error al cargar tarifas de proveedor:', err);
+        }
+      } else {
+        setTarifasProveedor([]);
+      }
+    };
+    fetchTarifas();
+  }, [loteId, lotes]);
+
+  // Effect to auto-fill costs when product or provider's tariffs change
+  useEffect(() => {
+    if (!productoId || tarifasProveedor.length === 0) {
+      return;
+    }
+    const matching = tarifasProveedor.find(t => t.producto?.id === Number(productoId));
+    if (matching) {
+      if (isAlbumes) {
+        setCostoCompraPaca(matching.costoPactado || 0);
+        setCostoCompraUnidad(Math.round((matching.costoPactado || 0) / 26));
+      } else if (isLaminas) {
+        setCostoCompraCaja(matching.costoPactado || 0);
+        setCostoCompraUnidad(Math.round((matching.costoPactado || 0) / 104));
+      } else {
+        setCostoCompraUnidad(matching.costoPactado || 0);
+      }
+    }
+  }, [productoId, tarifasProveedor, isAlbumes, isLaminas]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,7 +172,7 @@ function VincularProductoModal({
 
           {/* Lote Selection */}
           <div className="flex flex-col gap-1">
-            <label className="text-carbon-400 font-semibold uppercase tracking-wider text-[10px]">Lote / Financiador de Sede</label>
+            <label className="text-carbon-400 font-semibold uppercase tracking-wider text-[10px]">Proveedor / Lote Asociado</label>
             <CustomSelect
               options={lotes.map(l => ({
                 value: l.id,
@@ -130,7 +180,7 @@ function VincularProductoModal({
               }))}
               value={loteId}
               onChange={(val) => setLoteId(val)}
-              placeholder="-- Seleccionar Lote/Socio --"
+              placeholder="-- Seleccionar Proveedor/Lote --"
             />
             {lotes.length === 0 && (
               <p className="text-[10px] text-amber-500 font-semibold mt-1">
@@ -185,6 +235,7 @@ function VincularProductoModal({
                       <NumericStepper
                         value={costoCompraPaca}
                         onChange={(val) => setCostoCompraPaca(val)}
+                        disabled={isTarifaPactada}
                       />
                     </div>
                   )}
@@ -194,6 +245,7 @@ function VincularProductoModal({
                       <NumericStepper
                         value={costoCompraCaja}
                         onChange={(val) => setCostoCompraCaja(val)}
+                        disabled={isTarifaPactada}
                       />
                     </div>
                   )}
@@ -202,6 +254,7 @@ function VincularProductoModal({
                     <NumericStepper
                       value={costoCompraUnidad}
                       onChange={(val) => setCostoCompraUnidad(val)}
+                      disabled={isTarifaPactada}
                     />
                   </div>
                 </div>

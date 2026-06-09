@@ -24,7 +24,7 @@ function DeudaLoteCard({
             DEUDA ACTIVA - {lote.porcentajeGananciaAmortizacion}% AMORTIZACIÓN
           </span>
           <h4 className="text-base font-sports font-bold text-white mt-1.5">{lote.nombreLote}</h4>
-          <span className="text-xs text-carbon-500 font-medium">Inversionista: {lote.nombreInversionista || 'Externo'}</span>
+          <span className="text-xs text-carbon-500 font-medium">Proveedor: {lote.nombreProveedor || 'Externo'}</span>
         </div>
 
         <div className="text-right flex items-center gap-2 sm:self-start">

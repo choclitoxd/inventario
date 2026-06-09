@@ -46,7 +46,7 @@ public class LoteController {
     }
 
     @PostMapping
-    public ResponseEntity<Inventario> registrarEntradaLote(
+    public ResponseEntity<LoteInversionista> registrarEntradaLote(
             @RequestBody EntradaLoteDTO dto,
             @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId,
             @RequestHeader(value = "X-User-Username", required = false) String username) {
@@ -54,9 +54,9 @@ public class LoteController {
             return ResponseEntity.badRequest().build();
         }
         try {
-            Inventario inventario = loteService.registrarEntradaLote(dto, negocioId);
-            auditoriaService.registrarAccion(username, "REGISTRAR_LOTE", "Se registró entrada del lote: " + inventario.getLoteInversionista().getNombreLote() + " (Producto: " + inventario.getProducto().getNombre() + ", Financiador: " + inventario.getLoteInversionista().getFinanciador() + ")", negocioId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(inventario);
+            LoteInversionista lote = loteService.registrarEntradaLote(dto, negocioId);
+            auditoriaService.registrarAccion(username, "REGISTRAR_LOTE", "Se registró entrada del lote: " + lote.getNombreLote() + " (Financiador: " + lote.getFinanciador() + ", Monto: $" + lote.getMontoPrestado() + ")", negocioId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(lote);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -74,6 +74,37 @@ public class LoteController {
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editarLote(
+            @PathVariable Integer id,
+            @RequestBody LoteInversionista requestLote,
+            @RequestHeader(value = "X-User-Username", required = false) String username,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        try {
+            LoteInversionista updated = loteService.editarLote(id, requestLote.getNombreLote(), requestLote.getMontoPrestado(), requestLote.getSaldoPendiente());
+            auditoriaService.registrarAccion(username, "EDITAR_LOTE", "Se editó el lote ID " + id + " (" + updated.getNombreLote() + ", Deuda: $" + updated.getMontoPrestado() + ", Saldo: $" + updated.getSaldoPendiente() + ")", negocioId != null ? negocioId : updated.getNegocio().getId());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarLote(
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-User-Username", required = false) String username,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        try {
+            LoteInversionista lote = loteInversionistaRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Lote no encontrado con ID: " + id));
+            loteService.eliminarLote(id);
+            auditoriaService.registrarAccion(username, "ELIMINAR_LOTE", "Se eliminó el lote ID " + id + " (" + lote.getNombreLote() + ")", negocioId != null ? negocioId : lote.getNegocio().getId());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

@@ -29,6 +29,16 @@ public class ClienteController {
         return clienteRepository.findByNegocioId(negocioId);
     }
 
+    @GetMapping("/search")
+    public List<Cliente> buscarClientes(
+            @RequestParam String query,
+            @RequestHeader(value = "X-Negocio-Id", required = false) Integer negocioId) {
+        if (negocioId == null || query == null || query.isBlank()) {
+            return List.of();
+        }
+        return clienteRepository.searchClientes(query, negocioId, org.springframework.data.domain.PageRequest.of(0, 5));
+    }
+
     @GetMapping("/buscar")
     public ResponseEntity<Cliente> buscarPorTelefono(
             @RequestParam String telefono,

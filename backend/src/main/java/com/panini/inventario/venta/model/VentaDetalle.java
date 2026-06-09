@@ -2,6 +2,7 @@ package com.panini.inventario.venta.model;
 
 import com.panini.inventario.producto.model.Producto;
 import com.panini.inventario.stock.model.Inventario;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -20,18 +21,22 @@ public class VentaDetalle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venta_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Venta venta;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventario_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Inventario inventario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Producto producto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_detalle_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private VentaDetalle parentDetalle;
 
     @Column(name = "cantidad_pacas")

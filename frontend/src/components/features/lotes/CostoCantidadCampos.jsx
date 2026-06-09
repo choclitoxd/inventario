@@ -13,11 +13,12 @@ function CostoCantidadCampos({
   costoCaja,
   setCostoCaja,
   costoUnidad,
-  setCostoUnidad
+  setCostoUnidad,
+  ocultarCajas = false
 }) {
   return (
     <>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid ${ocultarCajas ? 'grid-cols-2' : 'grid-cols-3'} gap-2`}>
         <div className="flex flex-col gap-1">
           <label className="text-[9px] font-bold text-carbon-500">PACAS</label>
           <NumericStepper
@@ -25,13 +26,15 @@ function CostoCantidadCampos({
             onChange={(val) => setCantPacas(val.toString())}
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold text-carbon-500">CAJAS</label>
-          <NumericStepper
-            value={parseInt(cantCajas) || 0}
-            onChange={(val) => setCantCajas(val.toString())}
-          />
-        </div>
+        {!ocultarCajas && (
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] font-bold text-carbon-500">CAJAS</label>
+            <NumericStepper
+              value={parseInt(cantCajas) || 0}
+              onChange={(val) => setCantCajas(val.toString())}
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-1">
           <label className="text-[9px] font-bold text-carbon-500">UNIDADES</label>
           <NumericStepper
@@ -41,7 +44,7 @@ function CostoCantidadCampos({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      <div className={`grid ${ocultarCajas ? 'grid-cols-2' : 'grid-cols-3'} gap-2`}>
         <div className="flex flex-col gap-1">
           <label className="text-[9px] font-bold text-carbon-500">COSTO PACA</label>
           <NumericStepper
@@ -49,13 +52,15 @@ function CostoCantidadCampos({
             onChange={(val) => setCostoPaca(val.toString())}
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold text-carbon-500">COSTO CAJA</label>
-          <NumericStepper
-            value={parseFloat(costoCaja) || 0}
-            onChange={(val) => setCostoCaja(val.toString())}
-          />
-        </div>
+        {!ocultarCajas && (
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] font-bold text-carbon-500">COSTO CAJA</label>
+            <NumericStepper
+              value={parseFloat(costoCaja) || 0}
+              onChange={(val) => setCostoCaja(val.toString())}
+            />
+          </div>
+        )}
         <div className="flex flex-col gap-1">
           <label className="text-[9px] font-bold text-carbon-500">COSTO UNID</label>
           <NumericStepper

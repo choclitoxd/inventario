@@ -1,5 +1,6 @@
 package com.panini.inventario.stock.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class RegistroCajaAbierta {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventario_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Inventario inventario;
 
     @Column(name = "cantidad_cajas", nullable = false)
