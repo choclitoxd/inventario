@@ -1,7 +1,6 @@
 import React from 'react';
 import useLogin from '../hooks/useLogin';
 import LoginForm from '../components/features/login/LoginForm';
-import QuickLoginGrid from '../components/features/login/QuickLoginGrid';
 import { Shield, Layers } from 'lucide-react';
 
 function LoginPage() {
@@ -51,10 +50,6 @@ function LoginPage() {
             loading={loading}
             error={error}
             onSubmit={handleLogin}
-          />
-
-          <QuickLoginGrid
-            onSelectQuickUser={handleSelectQuickUser}
           />
         </div>
 
